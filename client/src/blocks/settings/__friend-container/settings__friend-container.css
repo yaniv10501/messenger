@@ -1,0 +1,6 @@
+.settings__friend-container {
+  margin-left: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

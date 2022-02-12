@@ -1,0 +1,22 @@
+.settings__friend-button {
+  padding: 0 10px;
+  border: 1px solid var(--blackColor);
+  background-color: var(--blueColor);
+  border-radius: 25px;
+  box-shadow: 0 0 2px 1px var(--blackColor);
+  height: 50px;
+  width: 120px;
+  opacity: 1;
+  transition: opacity 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
+    box-shadow 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.settings__friend-button:hover {
+  cursor: pointer;
+  opacity: 0.9;
+  box-shadow: 0 0 2px 2px var(--blackColor);
+}
+
+.settings__friend-button:first-child {
+  margin-right: 25px;
+}

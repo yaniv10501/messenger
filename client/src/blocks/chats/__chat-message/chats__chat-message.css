@@ -1,0 +1,8 @@
+.chats__chat-message {
+  margin: 0 0 20px 0;
+  width: 100%;
+  color: var(--blackColor);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

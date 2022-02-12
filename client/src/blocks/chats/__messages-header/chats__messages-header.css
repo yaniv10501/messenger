@@ -1,0 +1,10 @@
+.chats__messages-header {
+  z-index: 1;
+  padding-top: 10px;
+  display: flex;
+  border-bottom: 2px solid var(--blackColor);
+  box-shadow: 0 0 1px 3px var(--blackColor);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}

@@ -1,0 +1,16 @@
+.add-friends__back-button {
+  cursor: pointer;
+  width: fit-content;
+  height: 35px;
+  color: var(--blackColor);
+  font-size: 28px;
+  font-weight: 500;
+  margin: 20px 0 0 30px;
+  opacity: 1;
+  transition: opacity .3s ease-out;
+}
+
+.add-friends__back-button:hover {
+  opacity: 0.7;
+}
+

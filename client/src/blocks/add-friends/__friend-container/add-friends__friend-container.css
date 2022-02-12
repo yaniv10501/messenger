@@ -1,0 +1,22 @@
+.add-friends__more-friend-container,
+.add-friends__request-friend-container,
+.add-friends__pending-friend-container {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 180px;
+  width: 400px;
+  padding: 0 10px;
+  border: 1px solid var(--blackColor);
+  border-radius: 25px;
+  box-shadow: 0 0 2px 1px var(--blackColor);
+}
+
+.add-friends__pending-friend-container {
+  height: 150px;
+  margin-right: 20px;
+}
+
+.add-friends__pending-friend-container:last-of-type {
+  margin-right: 0;
+}

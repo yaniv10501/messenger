@@ -1,0 +1,10 @@
+.add-friends__more-action-container,
+.add-friends__requests-action-container,
+.add-friends__pending-action-container {
+  width: 100%;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 20px;
+}

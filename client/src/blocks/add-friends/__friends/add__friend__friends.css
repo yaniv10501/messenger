@@ -1,0 +1,8 @@
+.add-friends__friends {
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(100% - 55px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}

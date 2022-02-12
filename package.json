@@ -1,0 +1,30 @@
+{
+  "name": "messenger",
+  "version": "1.0.0",
+  "description": "messenger web app",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon server/app.js"
+  },
+  "author": "Yaniv Schweitzer",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^14.3.2",
+    "express": "^4.17.2",
+    "ws": "^8.4.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.7.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-node": "^4.1.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "nodemon": "^2.0.15"
+  }
+}

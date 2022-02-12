@@ -1,0 +1,12 @@
+.settings__friends-list {
+  height: 900px;
+  margin: 0 0 20px 0;
+  padding: 10px;
+  box-shadow: 0 0 2px 1px var(--blackColor);
+  border-radius: 25px;
+  background-color: var(--platinumColor);
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+}

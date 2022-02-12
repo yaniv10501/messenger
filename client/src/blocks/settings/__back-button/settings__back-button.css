@@ -1,0 +1,17 @@
+.settings__back-button {
+  margin: 20px 0 0 0;
+  width: 100px;
+  background-color: var(--whiteColor);
+  border: 1px solid var(--blackColor);
+  border-radius: 25px;
+  box-shadow: 0 0 2px 1px var(--blackColor);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30px;
+}
+
+.settings__back-button:hover {
+  cursor: pointer;
+  box-shadow: 0 0 2px 2px var(--blackColor);
+}

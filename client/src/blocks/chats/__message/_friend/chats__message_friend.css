@@ -1,0 +1,4 @@
+.chats__message_friend {
+  background-color: var(--blackColor);
+  align-self: flex-end;
+}

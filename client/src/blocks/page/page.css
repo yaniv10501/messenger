@@ -1,0 +1,7 @@
+.page {
+  background: var(--whiteColor);
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
+    display: flex;
+    flex-direction: column;
+}

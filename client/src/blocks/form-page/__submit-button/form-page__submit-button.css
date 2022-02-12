@@ -1,0 +1,16 @@
+.form-page__submit-button {
+  padding: 0;
+  margin: 20px 0;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--blackColor);
+  opacity: 1;
+  transition: opacity .3s ease-out;
+}
+
+.form-page__submit-button:hover {
+  opacity: 0.8;
+}

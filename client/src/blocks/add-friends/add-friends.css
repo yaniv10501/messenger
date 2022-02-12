@@ -1,0 +1,10 @@
+.add-friends {
+  box-sizing: border-box;
+  background-color: var(--whiteColor);
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex: 1 1 1;
+  flex-direction: column;
+  overflow: hidden;
+}

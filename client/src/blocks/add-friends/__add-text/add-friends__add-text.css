@@ -1,0 +1,15 @@
+.add-friends__more-add-text,
+.add-friends__request-add-text,
+.add-friends__pending-add-text {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.add-friends__more-block-text,
+.add-friends__request-block-text,
+.add-friends__pending-block-text {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}

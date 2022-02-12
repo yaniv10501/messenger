@@ -1,0 +1,7 @@
+.add-friends__more-buttons-container,
+.add-friends__request-buttons-container,
+.add-friends__pending-buttons-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}

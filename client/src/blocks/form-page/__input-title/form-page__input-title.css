@@ -1,0 +1,6 @@
+.form-page__input-title {
+  margin: 0;
+  color: var(--blackColor);
+  font-size: 28px;
+  font-weight: 700;
+}

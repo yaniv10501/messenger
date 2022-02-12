@@ -1,0 +1,10 @@
+.chats__message {
+  margin: 10px;
+  padding: 10px;
+  min-width: 100px;
+  width: fit-content;
+  max-width: 500px;
+  border-radius: 25px;
+  overflow-wrap: break-word;
+  display: flex;
+}

@@ -1,0 +1,17 @@
+.settings__profile-name {
+  width: 100%;
+  margin: 0 0 20px 0;
+  padding: 5px 10px 5px 15px;
+  font-size: 24px;
+  font-weight: 700;
+  box-shadow: 0 0 2px 2px var(--blackColor);
+  border-radius: 25px;
+  background-color: var(--platinumColor);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.settings__profile-name:last-child {
+  margin: 0;
+}

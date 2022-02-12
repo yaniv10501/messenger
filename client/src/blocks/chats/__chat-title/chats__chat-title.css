@@ -1,0 +1,6 @@
+.chats__chat-title {
+  margin: 0;
+  color: var(--blackColor);
+  font-size: 24px;
+  font-weight: 600;
+}

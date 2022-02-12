@@ -1,0 +1,10 @@
+.form-page__input {
+  border-radius: 25px;
+  border: 1px solid var(--blackColor);
+  width: 200px;
+  padding: 10px 15px;
+  margin-left: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--blackColor);
+}

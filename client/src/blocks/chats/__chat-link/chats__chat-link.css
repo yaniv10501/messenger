@@ -1,0 +1,7 @@
+.chats__chat-link {
+  margin-bottom: 10px;
+  height: fit-content;
+  width: 100%;
+  display: flex;
+  text-decoration: none;
+}

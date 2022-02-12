@@ -1,0 +1,11 @@
+.form-page__input-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.form-page__input-container:last-of-type {
+  margin-bottom: 0;
+}

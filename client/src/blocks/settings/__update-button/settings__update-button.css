@@ -1,0 +1,12 @@
+.settings__update-button {
+  border: none;
+  border-radius: 25px;
+  padding: 5px 10px;
+  margin: 10px 0;
+  opacity: 0.6;
+  transition: opacity .2s cubic-bezier(0.215, 0.610, 0.355, 1);
+}
+
+.settings__update-button_active {
+  opacity: 1;
+}

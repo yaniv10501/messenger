@@ -1,0 +1,7 @@
+.form-page__error-input {
+  min-height: 20px;
+  width: 100%;
+  color: red;
+  margin: 10px 0;
+  padding: 0 5px;
+}

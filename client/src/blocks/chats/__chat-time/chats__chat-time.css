@@ -1,0 +1,8 @@
+.chats__chat-time {
+  flex-grow: 1;
+  width: 100%;
+  height: fit-content;
+  text-align: center;
+  margin: 5px 0 0 0;
+  color: var(--blackColor);
+}

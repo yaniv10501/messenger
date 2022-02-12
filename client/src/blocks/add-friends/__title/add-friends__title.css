@@ -1,0 +1,7 @@
+.add-friends__more-title,
+.add-friends__requests-title,
+.add-friends__pending-title {
+  font-size: 48px;
+  margin: 0 0 20px 0;
+  text-align: center;
+}

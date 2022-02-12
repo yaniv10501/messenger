@@ -1,0 +1,11 @@
+.chats__chat-end-column {
+  z-index: 2;
+  padding: 0 7px;
+  max-width: 80px;
+  min-width: 80px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}

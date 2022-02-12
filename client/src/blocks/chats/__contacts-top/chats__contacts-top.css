@@ -1,0 +1,10 @@
+.chats__contacts-top {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  flex-wrap: wrap-reverse;
+  height: 100px;
+  padding: 0 15px 5px;
+  border-bottom: 2px solid var(--blackColor);
+  box-shadow: 0 0 1px 3px var(--blackColor);
+}

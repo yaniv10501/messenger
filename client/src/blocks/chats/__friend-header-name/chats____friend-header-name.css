@@ -1,0 +1,6 @@
+.chats__friend-header-name {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--blackColor);
+}

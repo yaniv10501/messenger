@@ -1,0 +1,20 @@
+.add-friends__more-add-button,
+.add-friends__request-add-button,
+.add-friends__pending-add-button {
+  width: 100px;
+  background-color: var(--blueColor);
+  border: 1px solid var(--blackColor);
+  box-shadow: 0 0 3px 2px var(--blackColor);
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  padding: 15px 10px;
+  transition: opacity 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.add-friends__more-add-button:hover,
+.add-friends__request-add-button:hover,
+.add-friends__pending-add-button:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}

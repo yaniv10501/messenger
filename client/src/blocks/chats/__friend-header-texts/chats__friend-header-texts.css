@@ -1,0 +1,5 @@
+.chats__friend-header-texts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

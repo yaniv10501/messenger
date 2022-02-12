@@ -1,0 +1,12 @@
+.add-friends__more-friend-image,
+.add-friends__request-friend-image,
+.add-friends__pending-friend-image {
+  height: 120px;
+  width: 120px;
+  border-radius: 50%;
+}
+
+.add-friends__pending-friend-image {
+  height: 100px;
+  width: 100px;
+}

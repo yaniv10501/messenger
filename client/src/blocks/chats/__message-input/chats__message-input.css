@@ -1,0 +1,16 @@
+.chats__message-input {
+  border: none;
+  padding: 5px 15px;
+  margin: 0 5px 0 15px;
+  min-height: 30px;
+  width: 700px;
+  overflow-y: scroll;
+  overflow-x: initial;
+  white-space: normal;
+  overflow-wrap: break-word;
+  border-radius: 25px;
+  box-shadow: 0 0 5px 2px var(--blackColor);
+  background-color: var(--whiteColor);
+  resize: none;
+  color: var(--blackColor);
+}
