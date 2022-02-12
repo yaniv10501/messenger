@@ -9,6 +9,7 @@ import noProfile from '../images/no-profile.png';
 import ComposePopup from './ComposePopup';
 import Preloader from './Preloader/Preloader';
 import NewGroupPopup from './NewGroupPopup';
+import ChatSettingsPopup from './ChatSettingsPopup';
 import GroupSettingsPopup from './GroupSettingsPopup';
 
 function Chats({
@@ -17,6 +18,8 @@ function Chats({
   setIsComposePopupOpen,
   isNewGroupPopupOpen,
   setIsNewGroupPopupOpen,
+  isChatSettingsPopupOpen,
+  setIsChatSettingsPopupOpen,
   isGroupSettingsPopupOpen,
   setIsGroupSettingsPopupOpen,
   closeAllPopups,
@@ -42,18 +45,8 @@ function Chats({
 
   const handleChange = (event) => {
     const { _id: chatId, friends } = currentChat;
-    console.log(friends);
-    fetch(`https://ymwebapp.com/api/${chatId}/type`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        friends,
-      }),
-      credentials: 'include',
-    }).catch((error) => console.log(error));
     setMessageInput(event.target.value);
+    mainApi.setUserTyping(thunkDispatch, chatId, friends).then((response) => console.log(response));
   };
 
   const handleSubmit = (event) => {
@@ -65,51 +58,53 @@ function Chats({
       left: 0,
     });
     const { _id: chatId, friends, isGroup, groupAdmin, isMute } = currentChat;
-    mainApi.sendMessage(thunkDispatch, messageInput, chatId, friends, isMute).then((response) => {
-      const { data: newMessage } = response;
-      const { messages: currentChatMessages } = currentChat;
-      if (currentChatMessages) {
-        setCurrentChat({
-          ...currentChat,
-          messages: [newMessage, ...currentChatMessages],
-        });
-      }
-      if (!currentChatMessages) {
-        setCurrentChat({
-          ...currentChat,
-          messages: [newMessage],
-        });
-      }
-      const currentChatData = allChatsData.find((chat) => chat._id === chatId);
-      console.log(currentChatData);
-      if (!currentChatData) {
-        const { chatName, chatImage } = currentChat;
-        const { messageContent: lastMessage, messageTime: lastMessageTime } = newMessage;
-        const newChatData = {
-          _id: chatId,
-          chatName,
-          chatImage,
-          isMute,
-          isGroup,
-          groupAdmin,
-          lastMessage,
-          lastMessageTime,
-        };
-        setAllChatsData([newChatData, ...allChatsData]);
-      }
-      if (currentChatData) {
-        const { messageContent: lastMessage, messageTime: lastMessageTime } = newMessage;
-        const newFriendChatData = {
-          ...currentChatData,
-          lastMessage,
-          lastMessageTime,
-          unreadCount: 0,
-        };
-        const newAllChatsData = allChatsData.filter((chat) => chat._id !== chatId);
-        setAllChatsData([newFriendChatData, ...newAllChatsData]);
-      }
-      setMessageInput('');
-    });
+    mainApi
+      .sendMessage(thunkDispatch, messageInput, chatId, friends, isMute, isGroup)
+      .then((response) => {
+        const { data: newMessage } = response;
+        const { messages: currentChatMessages } = currentChat;
+        if (currentChatMessages) {
+          setCurrentChat({
+            ...currentChat,
+            messages: [newMessage, ...currentChatMessages],
+          });
+        }
+        if (!currentChatMessages) {
+          setCurrentChat({
+            ...currentChat,
+            messages: [newMessage],
+          });
+        }
+        const currentChatData = allChatsData.find((chat) => chat._id === chatId);
+        console.log(currentChatData);
+        if (!currentChatData) {
+          const { chatName, chatImage } = currentChat;
+          const { messageContent: lastMessage, messageTime: lastMessageTime } = newMessage;
+          const newChatData = {
+            _id: chatId,
+            chatName,
+            chatImage,
+            isMute,
+            isGroup,
+            groupAdmin,
+            lastMessage,
+            lastMessageTime,
+          };
+          setAllChatsData([newChatData, ...allChatsData]);
+        }
+        if (currentChatData) {
+          const { messageContent: lastMessage, messageTime: lastMessageTime } = newMessage;
+          const newFriendChatData = {
+            ...currentChatData,
+            lastMessage,
+            lastMessageTime,
+            unreadCount: 0,
+          };
+          const newAllChatsData = allChatsData.filter((chat) => chat._id !== chatId);
+          setAllChatsData([newFriendChatData, ...newAllChatsData]);
+        }
+        setMessageInput('');
+      });
   };
 
   const handleKey = (event) => handleKeyPress(event, handleSubmit);
@@ -129,6 +124,13 @@ function Chats({
     }
     mainApi.getMessages(thunkDispatch, chatId).then((result) => {
       console.log(result);
+      const { loadedAll } = result;
+      if (loadedAll) {
+        setLoadedAllMessages(true);
+      }
+      if (!loadedAll) {
+        setLoadedAllMessages(false);
+      }
       if (isGroup) {
         setCurrentChat({
           ...result,
@@ -160,6 +162,9 @@ function Chats({
     });
   };
   const handleOpenChatSettings = () => {
+    setIsChatSettingsPopupOpen(true);
+  };
+  const handleOpenGroupSettings = () => {
     setIsGroupSettingsPopupOpen(true);
   };
   const initNewChat = (chatId, chatName, chatImage, friends) => {
@@ -203,13 +208,20 @@ function Chats({
         } = messagesPreloaderRef;
         if (scrollTop - offsetTop < 120) {
           console.log('Time to load more!');
-          mainApi.getMoreMessages(thunkDispatch, currentChat._id).then((moreMessages) => {
-            const { messages: currentChatMessages } = currentChat;
-            setCurrentChat({
-              ...currentChat,
-              messages: [...currentChatMessages, ...moreMessages],
+          if (!loadedAllMessages) {
+            mainApi.getMoreMessages(thunkDispatch, currentChat._id).then((moreMessages) => {
+              if (moreMessages.length < 1) {
+                setLoadedAllMessages(true);
+              }
+              if (moreMessages.length > 0) {
+                const { messages: currentChatMessages } = currentChat;
+                setCurrentChat({
+                  ...currentChat,
+                  messages: [...currentChatMessages, ...moreMessages],
+                });
+              }
             });
-          });
+          }
         }
       }
     }
@@ -243,19 +255,6 @@ function Chats({
       }
     }
   };
-  useEffect(() => {
-    mainApi.getChats(thunkDispatch).then((response) => {
-      const { loadedAll, chatsData } = response;
-      console.log(loadedAll);
-      if (loadedAll) {
-        setAllChatsData(chatsData);
-        setLoadedAllChats(true);
-      }
-      if (!loadedAll) {
-        setAllChatsData(response);
-      }
-    });
-  }, []);
   const updateMessages = useCallback(
     (data) => {
       const { message: newMessage, chatId } = data;
@@ -341,12 +340,19 @@ function Chats({
       chatWebSocket.onmessage = (wsMessage) => {
         const { message, data } = JSON.parse(wsMessage.data);
         if (message === 'New message') {
-          updateMessages(data);
+          const { chatId } = data;
+          const chatTypingTimer = chatTypingTimers.find((chatTimer) => chatTimer._id === chatId);
+          if (chatTypingTimer) {
+            const { timer, interval } = chatTypingTimer;
+            clearTimeout(timer);
+            clearInterval(interval);
+            const newChatTimers = chatTypingTimers.filter((chatTimer) => chatTimer._id !== chatId);
+            setChatTypingTimers(newChatTimers);
+            updateMessages(data);
+          }
         }
         if (message === 'User typing') {
           const { friendName, chatId } = data;
-          console.log(friendName);
-          const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
           const chatTypingTimer = chatTypingTimers.find((chatTimer) => chatTimer._id === chatId);
           const {
             ref: { current: lastMessageTarget },
@@ -362,6 +368,7 @@ function Chats({
               }
             }, 400);
             const chatTimer = setTimeout(() => {
+              const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
               lastMessageTarget.textContent = lastMessage;
               const newChatTimers = chatTypingTimers.filter(
                 (chatTimer) => chatTimer._id !== chatId
@@ -382,6 +389,7 @@ function Chats({
             const { timer, interval } = chatTypingTimer;
             clearTimeout(timer);
             const chatTimer = setTimeout(() => {
+              const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
               lastMessageTarget.textContent = lastMessage;
               const newChatTimers = chatTypingTimers.filter(
                 (chatTimer) => chatTimer._id !== chatId
@@ -444,6 +452,19 @@ function Chats({
       );
     }
   }, [allChatsData]);
+  useEffect(() => {
+    mainApi.getChats(thunkDispatch).then((response) => {
+      const { loadedAll, chatsData } = response;
+      console.log(loadedAll);
+      if (loadedAll) {
+        setAllChatsData(chatsData);
+        setLoadedAllChats(true);
+      }
+      if (!loadedAll) {
+        setAllChatsData(response);
+      }
+    });
+  }, []);
   return (
     <>
       <div className="chats">
@@ -550,7 +571,7 @@ function Chats({
               <button
                 className="chats__messages-header"
                 key={currentChat._id}
-                onClick={handleOpenChatSettings}
+                onClick={currentChat.isGroup ? handleOpenGroupSettings : handleOpenChatSettings}
               >
                 <img
                   src={currentChat.chatImage ? currentChat.chatImage : noProfile}
@@ -643,10 +664,13 @@ function Chats({
         friendsList={friendsList}
         initNewChat={initNewChat}
       />
+      <ChatSettingsPopup
+        currentChat={currentChat}
+        isPopupOpen={isChatSettingsPopupOpen}
+        handleClose={closeAllPopups}
+      />
       <GroupSettingsPopup
-        groupName={currentChat.chatName}
-        groupImage={currentChat.chatImage}
-        groupFriends={currentChat.friends}
+        currentChat={currentChat}
         isPopupOpen={isGroupSettingsPopupOpen}
         handleClose={closeAllPopups}
       />

@@ -11,7 +11,7 @@ function PopupCard({
   children,
 }) {
   return (
-    <Popup handleClose={handleClose} isOpen={isOpen} name={name} >
+    <Popup handleClose={handleClose} isOpen={isOpen} name={name}>
       <div className="popup__container">
         <div className="popup__header">
           <p className={name === 'info' ? 'popup__title popup__title_type_info' : 'popup__title'}>
@@ -26,9 +26,11 @@ function PopupCard({
         </div>
         <div className="popup__main">
           {children}
-          <a className="popup__bottom-link" href={popupTitle} onClick={handleLinkClick}>
-            {popupBottomLink}
-          </a>
+          {popupBottomLink && (
+            <button className="popup__bottom-link" onClick={handleLinkClick}>
+              {popupBottomLink}
+            </button>
+          )}
         </div>
       </div>
     </Popup>

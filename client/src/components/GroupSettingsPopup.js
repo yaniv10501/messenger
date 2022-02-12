@@ -1,15 +1,29 @@
 import React, { createRef, useEffect, useState } from 'react';
 import PopupCard from './PopupCard';
+import { fetchReducer, initialState, useThunkReducer } from '../utils/fetch';
+import mainApi from '../utils/MainApi';
 import closeIcon from '../images/close-icon.svg';
 import noProfile from '../images/no-profile.png';
 
-function GroupSettingsPopup({ groupName, groupImage, groupFriends, isPopupOpen, handleClose }) {
+function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
+  const [state, thunkDispatch] = useThunkReducer(fetchReducer, initialState);
+  const [isMoreFriendsPopupOpen, setIsMoreFriendsPopupOpen] = useState(false);
+  const [moreFriends, setMoreFriends] = useState([]);
   const [refsArray, setRefsArray] = useState([]);
   const [groupNameInput, setGroupNameInput] = useState('');
   const [groupImageInput, setGroupImageInput] = useState(null);
   const [formData, setFormData] = useState(null);
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const handleMoreFriendsPopupClose = () => {
+    setIsMoreFriendsPopupOpen(false);
+  };
+  const handleMoreFriendsPopupOpen = () => {
+    mainApi.getMoreGroupFriends(thunkDispatch, currentChat._id).then((response) => {
+      setMoreFriends(response);
+      setIsMoreFriendsPopupOpen(true);
+    });
+  };
   const handleSubmit = (event) => {
     event.preventDefault();
   };
@@ -25,7 +39,8 @@ function GroupSettingsPopup({ groupName, groupImage, groupFriends, isPopupOpen, 
     setFormData(tempData);
   };
   const addFriendToGroup = (event, _id, friendName) => {
-    if (selectedFriends.length < 1 && groupName !== '' && errorMessage !== '') {
+    const { chatName } = currentChat;
+    if (selectedFriends.length < 1 && chatName !== '' && errorMessage !== '') {
       setErrorMessage('');
     }
     const { target } = event;
@@ -49,40 +64,38 @@ function GroupSettingsPopup({ groupName, groupImage, groupFriends, isPopupOpen, 
     friendButton.textContent = 'Add';
   };
   useEffect(() => {
-    if (groupFriends) {
+    const { friends } = currentChat;
+    if (friends) {
       setRefsArray((refsArray) =>
-        groupFriends.map(({ _id }, i) => refsArray[i] || { _id, ref: createRef() })
+        friends.map(({ _id }, i) => refsArray[i] || { _id, ref: createRef() })
       );
     }
-  }, [groupFriends]);
+  }, [currentChat]);
   return (
     <PopupCard
       handleClose={handleClose}
       isOpen={isPopupOpen}
       name="new-group"
-      popupTitle="Create a new group"
+      popupTitle="Group settings"
       popupBottomLink=""
-      setLinkPopupOpen={() => {}}
+      handleLinkClick={() => {}}
     >
       <form className="popup__new-group-form" onSubmit={handleSubmit}>
         <div className="popup__new-group-details">
           <label className="popup__new-group-subtitle">
             Group name
-            <input
-              className="popup__new-group-name-input"
-              placeholder="Group name"
-              value={groupNameInput}
-              onChange={handleGroupNameChange}
-            />
+            <p className="popup__new-group-name-input">{currentChat.chatName}</p>
           </label>
           <p className="popup__new-group-subtitle">Group image</p>
           <label
             className="popup__new-group-image"
             htmlFor="profile-image"
             style={
-              groupImage ? {
-                backgroundImage: `url(${groupImage})`,
-              } : {}
+              currentChat.chatImage
+                ? {
+                    backgroundImage: `url(${currentChat.chatImage})`,
+                  }
+                : {}
             }
           >
             <div className="popup__new-group-image-overlay" />
@@ -96,11 +109,13 @@ function GroupSettingsPopup({ groupName, groupImage, groupFriends, isPopupOpen, 
           </label>
           <p className="popup__new-group-subtitle">Group friends</p>
           <ul className="popup__new-group-selcted-friends no-scroll-bar">
-            {selectedFriends &&
-              selectedFriends.length > 0 &&
-              selectedFriends.map(({ _id, friendName }) => (
+            {currentChat.friends &&
+              currentChat.friends.length > 0 &&
+              currentChat.friends.map(({ _id, firstName, lastName }) => (
                 <li className="popup__new-group-selcted-friend" key={_id}>
-                  <p className="popup__new-group-selcted-friend-name">{friendName}</p>
+                  <p className="popup__new-group-selcted-friend-name">
+                    {firstName} {lastName}
+                  </p>
                   <button
                     className="popup__new-group-diselect-friend-button"
                     onClick={() => removeSelectedFriend(_id)}
@@ -120,10 +135,10 @@ function GroupSettingsPopup({ groupName, groupImage, groupFriends, isPopupOpen, 
           <p className="popup__new-group-error">{errorMessage}</p>
         </div>
         <div className="popup__new-group-friends">
-          <h2 className="popup__new-group-friends-title">Add friends</h2>
+          <h2 className="popup__new-group-friends-title">Edit friends</h2>
           <div className="popup__new-group-friends-container no-scroll-bar">
-            {groupFriends && groupFriends.length > 0 ? (
-              groupFriends.map(({ _id, firstName, lastName, image }, index) => (
+            {currentChat.friends && currentChat.friends.length > 0 ? (
+              currentChat.friends.map(({ _id, firstName, lastName, image }, index) => (
                 <div className="popup__new-group-friend-card" key={_id}>
                   <img
                     className="popup__new-group-friend-image"
@@ -143,7 +158,7 @@ function GroupSettingsPopup({ groupName, groupImage, groupFriends, isPopupOpen, 
                         }
                         ref={refsArray[index].ref}
                       >
-                        Add
+                        Remove
                       </button>
                     ) : (
                       <button
@@ -162,9 +177,44 @@ function GroupSettingsPopup({ groupName, groupImage, groupFriends, isPopupOpen, 
             ) : (
               <div>You have no friends</div>
             )}
+            <button
+              className="popup__new-group-submit-button"
+              type="button"
+              onClick={handleMoreFriendsPopupOpen}
+            >
+              Add more friends
+            </button>
           </div>
         </div>
       </form>
+      <PopupCard
+        handleClose={handleMoreFriendsPopupClose}
+        isOpen={isMoreFriendsPopupOpen}
+        name="add-group-friends"
+        popupTitle="Add friends"
+        popupBottomLink="Done"
+        handleLinkClick={handleMoreFriendsPopupClose}
+      >
+        <div className="popup__compose-user-cards">
+          {moreFriends && moreFriends.length > 0 ? (
+            moreFriends.map(({ _id, firstName, lastName, image }) => (
+              <div className="popup__compose-user-card" key={_id}>
+                <img
+                  className="popup__compose-user-image"
+                  src={image ? image : noProfile}
+                  alt="friend icon"
+                />
+                <h2 className="popup__compose-user-name">{firstName} {lastName}</h2>
+                <button className="popup__compose-send-button" onClick={() => {}}>
+                  <p className="popup__compose-send-button-text">Add to group</p>
+                </button>
+              </div>
+            ))
+          ) : (
+            <div>You have no friends</div>
+          )}
+        </div>
+      </PopupCard>
     </PopupCard>
   );
 }

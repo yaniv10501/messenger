@@ -248,7 +248,24 @@ class MainApi {
       { silent: true }
     ).then((response) => response);
 
-  sendMessage = (dispatch, message, chatId, friends, isMute) =>
+  setUserTyping = (dispatch, chatId, friends) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/${chatId}/type`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          friends,
+        }),
+        credentials: 'include',
+      },
+      { silent: true }
+    ).then((response) => response);
+
+  sendMessage = (dispatch, message, chatId, friends, isMute, isGroup) =>
     useFetch(
       dispatch,
       `${this.baseUrl}/${chatId}/message`,
@@ -257,7 +274,7 @@ class MainApi {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message, friends, isMute }),
+        body: JSON.stringify({ message, friends, isMute, isGroup }),
         credentials: 'include',
       },
       { silent: true }
@@ -486,6 +503,18 @@ class MainApi {
           },
           { silent: true }
         ).then((response) => response);
+
+  getMoreGroupFriends = (dispatch, groupId) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/${groupId}/friends/more`,
+      {
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
 }
 
 const mainApi = new MainApi(backEndApi);

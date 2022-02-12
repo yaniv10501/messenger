@@ -33,6 +33,7 @@ function App() {
   const [isComposePopupOpen, setIsComposePopupOpen] = useState(false);
   const [isNewGroupPopupOpen, setIsNewGroupPopupOpen] = useState(false);
   const [isGroupSettingsPopupOpen, setIsGroupSettingsPopupOpen] = useState(false);
+  const [isChatSettingsPopupOpen, setIsChatSettingsPopupOpen] = useState(false);
   const [isNotifPopupOpen, setIfNotifPopupOpen] = useState(true);
   const [notification, setNotification] = useState({});
   const [notificationsQueue, setNotificationsQueue] = useState([]);
@@ -40,6 +41,7 @@ function App() {
     setIsComposePopupOpen(false);
     setIfNotifPopupOpen(false);
     setIsNewGroupPopupOpen(false);
+    setIsChatSettingsPopupOpen(false);
     setIsGroupSettingsPopupOpen(false);
   };
   const handleLogout = () => {
@@ -164,6 +166,8 @@ function App() {
                     setIsComposePopupOpen={setIsComposePopupOpen}
                     isNewGroupPopupOpen={isNewGroupPopupOpen}
                     setIsNewGroupPopupOpen={setIsNewGroupPopupOpen}
+                    isChatSettingsPopupOpen={isChatSettingsPopupOpen}
+                    setIsChatSettingsPopupOpen={setIsChatSettingsPopupOpen}
                     isGroupSettingsPopupOpen={isGroupSettingsPopupOpen}
                     setIsGroupSettingsPopupOpen={setIsGroupSettingsPopupOpen}
                     closeAllPopups={closeAllPopups}

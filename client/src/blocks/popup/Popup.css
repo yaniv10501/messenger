@@ -1,4 +1,7 @@
 .popup {
+  border: none;
+  text-align: left;
+  color: var(--blackColor);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -216,8 +219,22 @@
 }
 
 .popup__bottom-link {
+  font-size: 26px;
+  font-weight: 700;
+  border: none;
+  width: fit-content;
+  margin: 0 auto;
+  border-radius: 25px;
+  padding: 5px 10px;
+  box-shadow: 0 0 2px 3px var(--blackColor);
+  background-color: transparent;
   color: #2f71e5;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.popup__bottom-link:hover {
+  box-shadow: 0 0 2px 4px var(--blackColor);
 }
 
 .popup__close-button {
