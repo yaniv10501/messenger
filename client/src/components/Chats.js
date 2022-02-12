@@ -43,7 +43,7 @@ function Chats({
   const handleChange = (event) => {
     const { _id: chatId, friends } = currentChat;
     console.log(friends);
-    fetch(`http://localhost:3000/api/${chatId}/type`, {
+    fetch(`https://ymwebapp.com/api/${chatId}/type`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
