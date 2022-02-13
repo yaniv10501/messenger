@@ -30,14 +30,18 @@ function AddFriends({ chatWebSocket }) {
         const { message, data } = JSON.parse(wsMessage.data);
         if (message === 'Friend request') {
           setPendingFriendRequestsList([data, ...pendingFriendRequestsList]);
+          console.log('request');
         }
         if (message === 'Friend accept') {
-          const newPendingList = pendingFriendRequestsList.filter(({_id: requestId}) => requestId !== data._id)
-          setPendingFriendRequestsList(newPendingList);
+          const newFriendRequestsList = friendRequestsList.filter(
+            ({ _id: requestId }) => requestId !== data._id
+          );
+          setPendingFriendRequestsList(newFriendRequestsList);
+          console.log('accept');
         }
       };
     }
-  }, [chatWebSocket]);
+  }, [chatWebSocket, friendRequestsList, pendingFriendRequestsList]);
   return (
     <main className="add-friends">
       <div className="add-friends__back-button" onClick={handleBack}>
