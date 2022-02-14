@@ -56,45 +56,43 @@ class MainApi {
       { silent: true }
     ).then((response) => response);
 
-  getFriendImage = async (dispatch, friend, options) => {
-    const imagePromise = new Promise((resolve, reject) => {
-      const { listType = null, index = null } = options || {};
-      if (friend.image !== 'Uploaded') {
-        return resolve(friend);
-      }
-      const { _id } = friend;
-      return useFetch(
-        dispatch,
-        `${this.baseUrl}/${_id}/image?listType=${listType}&index=${index}`,
-        {
-          credentials: 'include',
-        },
-        { silent: true, image: true }
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error();
-          }
-          return response.blob();
-        })
-        .then((imageBlob) => {
-          const image = URL.createObjectURL(imageBlob);
-          resolve(image);
-        })
-        .then((image) => {
-          if (image instanceof Error) {
-            return friend;
-          }
-          resolve({
-            ...friend,
-            image,
-          });
-        })
-        .catch(() => {
-          resolve(friend);
-        });
-    });
-    return imagePromise.then((friend) => friend);
+  getFriendImage = (dispatch, friend, options) => {
+    const { listType = null, index = null, chatId = null } = options || {};
+    if (friend.image !== 'Uploaded') {
+      return friend;
+    }
+    const { _id } = friend;
+    return useFetch(
+      dispatch,
+      `${this.baseUrl}/${_id}/image?listType=${listType}&index=${index}${chatId && `&chatId=${chatId}`}`,
+      {
+        credentials: 'include',
+      },
+      { silent: true, image: true }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error();
+        }
+        return response.blob();
+      })
+      .then((imageBlob) => {
+        const image = URL.createObjectURL(imageBlob);
+        return image;
+      })
+      .then((image) => {
+        if (image instanceof Error) {
+          return friend;
+        }
+        console.log(friend);
+        return {
+          ...friend,
+          image,
+        };
+      })
+      .catch(() => {
+        return friend;
+      });
   };
 
   getUserImage = (dispatch, user) => {
@@ -123,6 +121,7 @@ class MainApi {
         if (image instanceof Error) {
           return user;
         }
+        console.log(image);
         return {
           ...user,
           image,

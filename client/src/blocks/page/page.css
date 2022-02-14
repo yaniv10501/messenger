@@ -1,4 +1,5 @@
 .page {
+  min-height: 100vh;
   background: var(--whiteColor);
   font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
     Bitstream Vera Sans Mono, Courier New, monospace;

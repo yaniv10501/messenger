@@ -1,0 +1,10 @@
+.menu__notif-button {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.menu__notif-button:hover {
+  cursor: pointer;
+}

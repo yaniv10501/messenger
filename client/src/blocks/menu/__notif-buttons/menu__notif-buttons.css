@@ -1,0 +1,4 @@
+.menu__notif-buttons {
+  display: flex;
+  flex-direction: column;
+}

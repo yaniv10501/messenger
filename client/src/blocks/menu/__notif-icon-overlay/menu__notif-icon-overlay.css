@@ -1,0 +1,10 @@
+.menu__notif-icon-overlay {
+  z-index: 99;
+  position: relative;
+  cursor: pointer;
+  transition: opacity 0.3s cubic-bezier(0.175, 0.885, 0.32, 1);
+}
+
+.menu__notif-icon-overlay:hover {
+  opacity: 0.8;
+}

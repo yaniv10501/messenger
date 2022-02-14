@@ -45,6 +45,7 @@ function UserSettings({ setCurrentUser }) {
     const image = event.target.files[0];
     formData.append('profilePic', image, image.name);
     mainApi.setUserImage(thunkDispatch, formData).then((response) => {
+      console.log(response);
       setCurrentUser(response);
     });
   };

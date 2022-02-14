@@ -1,0 +1,17 @@
+.menu__notif-count {
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  background-color: var(--blueColor);
+  color: var(--blackColor);
+  border-radius: 50%;
+  padding: 7px;
+  width: 7px;
+  height: 7px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

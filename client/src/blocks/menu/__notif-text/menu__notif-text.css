@@ -1,0 +1,8 @@
+.menu__notif-text {
+  width: 150px;
+  margin: 0 20px 5px 0;
+}
+
+.menu__no-notif-text {
+  font-weight: 700;
+}

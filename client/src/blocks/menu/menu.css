@@ -1,0 +1,14 @@
+.menu {
+  z-index: 99;
+  position: fixed;
+  height: 85px;
+  top: -95px;
+  right: 0;
+  width: 100%;
+  background-color: var(--greyColor);
+  padding: 5px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-self: center;
+  transition: top 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}

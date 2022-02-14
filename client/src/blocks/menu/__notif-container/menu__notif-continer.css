@@ -1,0 +1,11 @@
+.menu__notif-continer {
+  padding: 5px;
+  display: flex;
+}
+
+.menu__no-notif-container {
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

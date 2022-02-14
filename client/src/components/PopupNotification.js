@@ -32,9 +32,13 @@ function PopupNotification({
             <div className="popup__notif-content-container">
               <p className="popup__notif-friend-name">{notification.user.userName}</p>
               <div className="popup__notif-content">
-              <p className="popup__notif-text">{notification.message.messageContent}</p>
-              <p className="popup__notif-time">{notification.message.messageTime}</p>
-              <p className="popup__notif-count">{notificationsQueue.length + 1}</p>
+                {notification.type === 'New message' && (
+                  <>
+                    <p className="popup__notif-text">{notification.message.messageContent}</p>
+                    <p className="popup__notif-time">{notification.message.messageTime}</p>
+                    <p className="popup__notif-count">{notificationsQueue.length + 1}</p>
+                  </>
+                )}
               </div>
             </div>
           </div>

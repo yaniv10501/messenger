@@ -12,9 +12,21 @@ function AddFriends({ chatWebSocket }) {
   const [friendRequestsList, setFriendRequestsList] = useState([]);
   const [pendingFriendRequestsList, setPendingFriendRequestsList] = useState([]);
   const handleBack = () => navigate('/');
-  const handleAddFriend = (friendId, index) => mainApi.addFriend(thunkDispatch, friendId, index);
+  const handleAddFriend = (friendId, index) =>
+    mainApi.addFriend(thunkDispatch, friendId, index).then((response) => {
+      console.log(response);
+      const newAddFriendsList = addFriendsList.filter((friend) => friend._id !== friendId);
+      setAddFriendsList(newAddFriendsList);
+      setFriendRequestsList([response, ...friendRequestsList]);
+    });
   const handleAcceptRequest = (requestId, index) =>
-    mainApi.acceptFriendRequest(thunkDispatch, requestId, index);
+    mainApi.acceptFriendRequest(thunkDispatch, requestId, index).then((response) => {
+      console.log(response);
+      const newPendingFriendsList = pendingFriendRequestsList.filter(
+        (friend) => friend._id !== requestId
+      );
+      setPendingFriendRequestsList(newPendingFriendsList);
+    });
   useEffect(() => {
     mainApi.getAddFriends(thunkDispatch).then((response) => {
       console.log(response);
@@ -36,7 +48,7 @@ function AddFriends({ chatWebSocket }) {
           const newFriendRequestsList = friendRequestsList.filter(
             ({ _id: requestId }) => requestId !== data._id
           );
-          setPendingFriendRequestsList(newFriendRequestsList);
+          setFriendRequestsList(newFriendRequestsList);
           console.log('accept');
         }
       };

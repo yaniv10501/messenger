@@ -20,6 +20,7 @@ import Loading from './Loading';
 import AddFriends from './AddFriends';
 import UserSettings from './UserSettings';
 import PopupNotification from './PopupNotification';
+import Menu from './Menu';
 
 function App() {
   const location = useLocation();
@@ -107,33 +108,79 @@ function App() {
               })
               .then((friendWithImage) => {
                 console.log(friendWithImage);
-                if (notification.type) {
-                  setNotificationsQueue([notification, ...notificationsQueue]);
-                  console.log(data);
-                }
-                if (!notification.type) {
-                  setNotification({
+                setNotification({
+                  type: 'New message',
+                  ...data,
+                  user: friendWithImage,
+                });
+                setNotificationsQueue([
+                  {
                     type: 'New message',
                     ...data,
                     user: friendWithImage,
-                  });
-                }
+                  },
+                  ...notificationsQueue,
+                ]);
               });
           }
         }
         if (location.pathname !== '/addfriends') {
           if (message === 'Friend request') {
-            console.log(data);
+            mainApi
+              .getFriendImage(thunkDispatch, data, {
+                listType: 'messageNotif',
+              })
+              .then((friendWithImage) => {
+                console.log(friendWithImage);
+                setNotification({
+                  type: 'Friend request',
+                  user: friendWithImage,
+                });
+                setNotificationsQueue([
+                  {
+                    type: 'Friend request',
+                    user: friendWithImage,
+                  },
+                  ...notificationsQueue,
+                ]);
+              });
+          }
+          if (message === 'Friend accept') {
+            mainApi
+              .getFriendImage(thunkDispatch, data, {
+                listType: 'messageNotif',
+              })
+              .then((friendWithImage) => {
+                console.log(friendWithImage);
+                setNotification({
+                  type: 'Friend accept',
+                  user: friendWithImage,
+                });
+                setNotificationsQueue([
+                  {
+                    type: 'Friend accept',
+                    user: friendWithImage,
+                  },
+                  ...notificationsQueue,
+                ]);
+              });
           }
         }
       };
     }
-  }, [location, chatWebSocket, notification, notificationsQueue]);
+  }, [location, chatWebSocket, notificationsQueue]);
   return (
     <>
       <Loading isLoading={pageLoading} />
       <div className={pageLoading ? 'page page_hidden' : 'page'}>
         <CurrentUserContext.Provider value={currentUser}>
+          <Menu
+            loggedIn={loggedIn}
+            notification={notification}
+            setNotification={setNotification}
+            notificationsQueue={notificationsQueue}
+            setNotificationsQueue={setNotificationsQueue}
+          />
           <Routes>
             <Route path="/loading" element={<Loading />} />
             <Route

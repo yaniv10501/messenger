@@ -38,7 +38,7 @@ function Chats({
   const [currentChat, setCurrentChat] = useState({});
   const [messageInput, setMessageInput] = useState('');
   const [isUserTyping, setIsUserTyping] = useState([]);
-  const [userTypingText, setUserTypingText] = useState('Typing');
+  const [userTypingText, setUserTypingText] = useState('');
   const [typingTimer, setTypingTimer] = useState(null);
   const [chatTypingTimers, setChatTypingTimers] = useState([]);
   const [refsArray, setRefsArray] = useState([]);
@@ -187,6 +187,7 @@ function Chats({
       friends,
       messages: [],
     });
+    setLoadedAllMessages(true);
     closeAllPopups();
   };
   const handleOpenNewGroup = () => {
@@ -334,7 +335,7 @@ function Chats({
         }
       }, 400);
     }
-  }, [isUserTyping, userTypingText, currentChat._id]);
+  }, [isUserTyping, userTypingText, currentChat]);
   useEffect(() => {
     if (chatWebSocket) {
       chatWebSocket.onmessage = (wsMessage) => {
@@ -352,82 +353,120 @@ function Chats({
           }
         }
         if (message === 'User typing') {
+          console.log(data);
           const { friendName, chatId } = data;
           const chatTypingTimer = chatTypingTimers.find((chatTimer) => chatTimer._id === chatId);
-          const {
-            ref: { current: lastMessageTarget },
-          } = refsArray.find((ref) => ref._id === chatId);
-          if (!chatTypingTimer) {
-            const chatInterval = setInterval(() => {
-              const currentTimerText = lastMessageTarget.textContent;
-              console.log(currentTimerText);
-              if (currentTimerText === `${friendName} Typing...`) {
-                lastMessageTarget.textContent = `${friendName} Typing`;
-              } else {
-                lastMessageTarget.textContent = `${currentTimerText}.`;
-              }
-            }, 400);
-            const chatTimer = setTimeout(() => {
-              const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
-              lastMessageTarget.textContent = lastMessage;
-              const newChatTimers = chatTypingTimers.filter(
-                (chatTimer) => chatTimer._id !== chatId
-              );
-              setChatTypingTimers(newChatTimers);
-              clearInterval(chatInterval);
-            }, 1500);
-            setChatTypingTimers([
-              {
-                _id: chatId,
-                timer: chatTimer,
-                interval: chatInterval,
-              },
-              ...chatTypingTimers,
-            ]);
-          }
-          if (chatTypingTimer) {
-            const { timer, interval } = chatTypingTimer;
-            clearTimeout(timer);
-            const chatTimer = setTimeout(() => {
-              const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
-              lastMessageTarget.textContent = lastMessage;
-              const newChatTimers = chatTypingTimers.filter(
-                (chatTimer) => chatTimer._id !== chatId
-              );
-              setChatTypingTimers(newChatTimers);
-              clearInterval(interval);
-            }, 1500);
-            const newChatTimers = chatTypingTimers.filter((chatTimer) => chatTimer._id !== chatId);
-            setChatTypingTimers([
-              {
-                _id: chatId,
-                timer: chatTimer,
-                interval,
-              },
-              ...newChatTimers,
-            ]);
-          }
-          const { isTyping } = isUserTyping.find((user) => user._id === chatId);
-          console.log(isTyping);
-          if (!isTyping) {
-            const newIsUserTyping = isUserTyping.map(({ _id, isTyping }) =>
-              _id === chatId ? { _id, isTyping: true } : { _id, isTyping }
-            );
-            setIsUserTyping(newIsUserTyping);
+          const chatRef = refsArray.find((ref) => ref._id === chatId);
+          if (!chatRef) {
             if (currentChat._id === chatId) {
-              setUserTypingText(`${friendName} Typing`);
+              const chatUserTyping = isUserTyping.find((user) => user._id === chatId);
+              if (!chatUserTyping) {
+                setIsUserTyping([{ _id: chatId, isTyping: true }, ...isUserTyping]);
+                setUserTypingText(`${friendName} Typing`);
+              }
+              if (chatUserTyping) {
+                const { isTyping } = chatUserTyping;
+                if (!isTyping) {
+                  const newIsUserTyping = isUserTyping.map(({ _id, isTyping }) =>
+                    _id === chatId ? { _id, isTyping: true } : { _id, isTyping }
+                  );
+                  setIsUserTyping(newIsUserTyping);
+                  setUserTypingText(`${friendName} Typing`);
+                }
+              }
             }
-            lastMessageTarget.textContent = `${friendName} Typing`;
+            if (typingTimer) clearTimeout(typingTimer);
+            const timer = setTimeout(() => {
+              const newIsUserTyping = isUserTyping.map(({ _id, isTyping }) =>
+                _id === chatId ? { _id, isTyping: false } : { _id, isTyping }
+              );
+              setIsUserTyping(newIsUserTyping);
+              setTypingTimer(null);
+            }, 1500);
+            setTypingTimer(timer);
           }
-          if (typingTimer) clearTimeout(typingTimer);
-          const timer = setTimeout(() => {
-            const newIsUserTyping = isUserTyping.map(({ _id, isTyping }) =>
-              _id === chatId ? { _id, isTyping: false } : { _id, isTyping }
-            );
-            setIsUserTyping(newIsUserTyping);
-            setTypingTimer(null);
-          }, 1500);
-          setTypingTimer(timer);
+          if (chatRef) {
+            const {
+              ref: { current: lastMessageTarget },
+            } = chatRef;
+            if (!chatTypingTimer) {
+              const chatInterval = setInterval(() => {
+                const currentTimerText = lastMessageTarget.textContent;
+                console.log(currentTimerText);
+                if (currentTimerText === `${friendName} Typing...`) {
+                  lastMessageTarget.textContent = `${friendName} Typing`;
+                } else {
+                  lastMessageTarget.textContent = `${currentTimerText}.`;
+                }
+              }, 400);
+              const chatTimer = setTimeout(() => {
+                const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
+                lastMessageTarget.textContent = lastMessage;
+                const newChatTimers = chatTypingTimers.filter(
+                  (chatTimer) => chatTimer._id !== chatId
+                );
+                setChatTypingTimers(newChatTimers);
+                clearInterval(chatInterval);
+              }, 1500);
+              setChatTypingTimers([
+                {
+                  _id: chatId,
+                  timer: chatTimer,
+                  interval: chatInterval,
+                },
+                ...chatTypingTimers,
+              ]);
+            }
+            if (chatTypingTimer) {
+              const { timer, interval } = chatTypingTimer;
+              clearTimeout(timer);
+              const chatTimer = setTimeout(() => {
+                const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
+                lastMessageTarget.textContent = lastMessage;
+                const newChatTimers = chatTypingTimers.filter(
+                  (chatTimer) => chatTimer._id !== chatId
+                );
+                setChatTypingTimers(newChatTimers);
+                clearInterval(interval);
+              }, 1500);
+              const newChatTimers = chatTypingTimers.filter(
+                (chatTimer) => chatTimer._id !== chatId
+              );
+              setChatTypingTimers([
+                {
+                  _id: chatId,
+                  timer: chatTimer,
+                  interval,
+                },
+                ...newChatTimers,
+              ]);
+            }
+            const { isTyping } = isUserTyping.find((user) => user._id === chatId);
+            console.log(isTyping);
+            if (!isTyping) {
+              const newIsUserTyping = isUserTyping.map(({ _id, isTyping }) =>
+                _id === chatId ? { _id, isTyping: true } : { _id, isTyping }
+              );
+              setIsUserTyping(newIsUserTyping);
+              if (currentChat._id === chatId) {
+                setUserTypingText(`${friendName} Typing`);
+              }
+              lastMessageTarget.textContent = `${friendName} Typing`;
+            }
+            if (typingTimer) clearTimeout(typingTimer);
+            const timer = setTimeout(() => {
+              const newIsUserTyping = isUserTyping.map(({ _id, isTyping }) =>
+                _id === chatId ? { _id, isTyping: false } : { _id, isTyping }
+              );
+              setIsUserTyping(newIsUserTyping);
+              setTypingTimer(null);
+            }, 1500);
+            setTypingTimer(timer);
+          }
+        }
+        if (message === 'New group') {
+          const { group } = data;
+          setAllChatsData([group, ...allChatsData]);
         }
       };
     }
@@ -455,7 +494,7 @@ function Chats({
   useEffect(() => {
     mainApi.getChats(thunkDispatch).then((response) => {
       const { loadedAll, chatsData } = response;
-      console.log(loadedAll);
+      console.log(response);
       if (loadedAll) {
         setAllChatsData(chatsData);
         setLoadedAllChats(true);
@@ -496,7 +535,7 @@ function Chats({
                 {
                   _id,
                   chatName,
-                  chatImage,
+                  image,
                   isGroup,
                   groupAdmin,
                   friends,
@@ -512,12 +551,12 @@ function Chats({
                   key={_id}
                   id={_id}
                   onClick={() =>
-                    handleChatClick(_id, chatName, chatImage, isMute, isGroup, groupAdmin, friends)
+                    handleChatClick(_id, chatName, image, isMute, isGroup, groupAdmin, friends)
                   }
                 >
                   <img
                     className="chats__friend-icon"
-                    src={chatImage ? chatImage : noProfile}
+                    src={image ? image : noProfile}
                     alt="friend icon"
                   />
 
