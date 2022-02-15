@@ -56,80 +56,88 @@ class MainApi {
       { silent: true }
     ).then((response) => response);
 
-  getFriendImage = (dispatch, friend, options) => {
-    const { listType = null, index = null, chatId = null } = options || {};
-    if (friend.image !== 'Uploaded') {
-      return friend;
-    }
-    const { _id } = friend;
-    return useFetch(
-      dispatch,
-      `${this.baseUrl}/${_id}/image?listType=${listType}&index=${index}${chatId && `&chatId=${chatId}`}`,
-      {
-        credentials: 'include',
-      },
-      { silent: true, image: true }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error();
-        }
-        return response.blob();
-      })
-      .then((imageBlob) => {
-        const image = URL.createObjectURL(imageBlob);
-        return image;
-      })
-      .then((image) => {
-        if (image instanceof Error) {
-          return friend;
-        }
-        console.log(friend);
-        return {
-          ...friend,
-          image,
-        };
-      })
-      .catch(() => {
-        return friend;
-      });
+  getFriendImage = async (dispatch, friend, options) => {
+    const imagePromise = new Promise((resovle) => {
+      const { listType = null, index = null, chatId = null } = options || {};
+      if (friend.image !== 'Uploaded') {
+        resovle(friend);
+      }
+      const { _id } = friend;
+      useFetch(
+        dispatch,
+        `${this.baseUrl}/${_id}/image?listType=${listType}&index=${index}${
+          chatId && `&chatId=${chatId}`
+        }`,
+        {
+          credentials: 'include',
+        },
+        { silent: true, image: true }
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error();
+          }
+          return response.blob();
+        })
+        .then((imageBlob) => {
+          const image = URL.createObjectURL(imageBlob);
+          return image;
+        })
+        .then((image) => {
+          if (image instanceof Error) {
+            resovle(friend);
+          }
+          console.log(friend);
+          resovle({
+            ...friend,
+            image,
+          });
+        })
+        .catch(() => {
+          resovle(friend);
+        });
+    });
+    return imagePromise.then((friend) => friend);
   };
 
-  getUserImage = (dispatch, user) => {
-    if (user.image !== 'Uploaded') {
-      return user;
-    }
-    return useFetch(
-      dispatch,
-      `${this.baseUrl}/users/me/image`,
-      {
-        credentials: 'include',
-      },
-      { silent: true, image: true }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error();
-        }
-        return response.blob();
-      })
-      .then((imageBlob) => {
-        const image = URL.createObjectURL(imageBlob);
-        return image;
-      })
-      .then((image) => {
-        if (image instanceof Error) {
-          return user;
-        }
-        console.log(image);
-        return {
-          ...user,
-          image,
-        };
-      })
-      .catch(() => {
-        return user;
-      });
+  getUserImage = async (dispatch, user) => {
+    const imagePromise = new Promise((resovle) => {
+      if (user.image !== 'Uploaded') {
+        resovle(user);
+      }
+      return useFetch(
+        dispatch,
+        `${this.baseUrl}/users/me/image`,
+        {
+          credentials: 'include',
+        },
+        { silent: true, image: true }
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error();
+          }
+          return response.blob();
+        })
+        .then((imageBlob) => {
+          const image = URL.createObjectURL(imageBlob);
+          return image;
+        })
+        .then((image) => {
+          if (image instanceof Error) {
+            resovle(user);
+          }
+          console.log(image);
+          resovle({
+            ...user,
+            image,
+          });
+        })
+        .catch(() => {
+          resovle(user);
+        });
+    });
+    return imagePromise.then((user) => user);
   };
 
   setUserImage = (dispatch, imageUpload) =>

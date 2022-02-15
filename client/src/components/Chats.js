@@ -349,8 +349,8 @@ function Chats({
             clearInterval(interval);
             const newChatTimers = chatTypingTimers.filter((chatTimer) => chatTimer._id !== chatId);
             setChatTypingTimers(newChatTimers);
-            updateMessages(data);
           }
+          updateMessages(data);
         }
         if (message === 'User typing') {
           console.log(data);

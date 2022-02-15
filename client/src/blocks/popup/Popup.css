@@ -28,7 +28,6 @@
 .popup__container {
   display: inline-flex;
   flex-direction: column;
-  height: 50vh;
   margin-top: 207px;
   box-sizing: border-box;
   position: relative;
@@ -41,8 +40,6 @@
 }
 
 .popup__main {
-  height: 0;
-  min-height: calc(100% - 60px);
   display: flex;
   flex-direction: column;
 }
