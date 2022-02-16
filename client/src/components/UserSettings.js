@@ -101,11 +101,12 @@ function UserSettings({ setCurrentUser }) {
             className="settings__profile-image"
             htmlFor="profile-image"
             style={
-              image && {
-                backgroundImage: `url(${image})`,
-              }
-            }
-          >
+              image
+                ? {
+                    backgroundImage: `url(${image})`,
+                  }
+                : {}
+            }          >
             <div className="settings__profile-image-overlay" />
             <p className="settings__profile-image-text">Upload</p>
             <input
