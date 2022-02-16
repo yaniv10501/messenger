@@ -1,18 +1,19 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import notifIcon from '../images/notifications.svg';
 import menuIcon from '../images/menu.png';
 import arrow from '../images/arrow.svg';
 import noProfile from '../images/no-profile.svg';
+import { useNavigate } from 'react-router-dom';
 
 function Menu({
   loggedIn,
+  menuRef,
   notification,
   setNotification,
   notificationsQueue,
   setNotificationsQueue,
 }) {
-  console.log(notification, notificationsQueue);
-  const menuRef = useRef();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [notificationIndex, setNotificationIndex] = useState(0);
   const toggleMenuOpen = () => {
@@ -38,16 +39,38 @@ function Menu({
       setNotificationIndex(notificationIndex + 1);
     }
   };
+  const handleNotificationAction = () => {
+    if (notification.type) {
+      toggleMenuOpen();
+      switch (notification.type) {
+        case 'New message':
+          navigate('/chats');
+          break;
+        case 'Friend request':
+          navigate('/addfriends');
+          break;
+        case 'Friend accept':
+          navigate('/chats');
+          break;
+        default:
+          break;
+      }
+    }
+  };
   return (
     <>
       {loggedIn && (
         <div className="menu" ref={menuRef}>
-          <div className="menu__notif-icon-overlay">
+          <button
+            className="menu__notif-icon-overlay"
+            type="button"
+            onClick={handleNotificationAction}
+          >
             <img className="menu__notif-icon" src={notifIcon} alt="notif" />
             {notificationsQueue && notificationsQueue.length > 0 && (
               <p className="menu__notif-count">{notificationsQueue.length}</p>
             )}
-          </div>
+          </button>
           {notification.user ? (
             <div className="menu__notif-continer">
               <img

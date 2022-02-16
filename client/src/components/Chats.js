@@ -324,6 +324,7 @@ function Chats({
     },
     [allChatsData, currentChat]
   );
+  /** Controlling main chat typing text */
   useEffect(() => {
     const userTyping = isUserTyping.find((isUser) => isUser._id === currentChat._id);
     if (userTyping && userTyping.isTyping) {
@@ -336,6 +337,7 @@ function Chats({
       }, 400);
     }
   }, [isUserTyping, userTypingText, currentChat]);
+  /** Handling websocket messages */
   useEffect(() => {
     if (chatWebSocket) {
       chatWebSocket.onmessage = (wsMessage) => {
@@ -390,6 +392,7 @@ function Chats({
               ref: { current: lastMessageTarget },
             } = chatRef;
             if (!chatTypingTimer) {
+              lastMessageTarget.textContent = `${friendName} Typing`;
               const chatInterval = setInterval(() => {
                 const currentTimerText = lastMessageTarget.textContent;
                 console.log(currentTimerText);
@@ -480,17 +483,43 @@ function Chats({
     chatTypingTimers,
     refsArray,
   ]);
+  /** Making dynamic ref objects for chats array and user typing array */
   useEffect(() => {
     console.log(allChatsData);
     if (allChatsData.length > 0) {
       setRefsArray((refsArray) =>
-        allChatsData.map(({ _id }, i) => refsArray[i] || { _id, ref: createRef() })
+        allChatsData.map(({ _id }, i) => {
+          const currentRef = refsArray[i];
+          if (currentRef) {
+            if (currentRef._id === _id) {
+              return currentRef;
+            }
+            return {
+              ...currentRef,
+              _id,
+            };
+          }
+          return { _id, ref: createRef() };
+        })
       );
       setIsUserTyping((isUserTyping) =>
-        allChatsData.map(({ _id }, i) => isUserTyping[i] || { _id, isTyping: false })
+        allChatsData.map(({ _id }, i) => {
+          const currentRef = isUserTyping[i];
+          if (currentRef) {
+            if (currentRef._id === _id) {
+              return currentRef;
+            }
+            return {
+              ...currentRef,
+              _id,
+            };
+          }
+          return { _id, isTyping: false };
+        })
       );
     }
   }, [allChatsData]);
+  /** Loading init data */
   useEffect(() => {
     mainApi.getChats(thunkDispatch).then((response) => {
       const { loadedAll, chatsData } = response;

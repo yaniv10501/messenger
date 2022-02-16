@@ -106,7 +106,8 @@ function UserSettings({ setCurrentUser }) {
                     backgroundImage: `url(${image})`,
                   }
                 : {}
-            }          >
+            }
+          >
             <div className="settings__profile-image-overlay" />
             <p className="settings__profile-image-text">Upload</p>
             <input
