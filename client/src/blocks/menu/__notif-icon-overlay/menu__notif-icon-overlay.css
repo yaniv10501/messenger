@@ -1,4 +1,7 @@
 .menu__notif-icon-overlay {
+  padding: 0;
+  border: none;
+  background-color: transparent;
   z-index: 99;
   position: relative;
   cursor: pointer;

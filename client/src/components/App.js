@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Route,
   Routes,
@@ -21,12 +21,14 @@ import AddFriends from './AddFriends';
 import UserSettings from './UserSettings';
 import PopupNotification from './PopupNotification';
 import Menu from './Menu';
+import animateMenu from '../utils/animateMenu';
 
 function App() {
   const location = useLocation();
   const navigationType = useNavigationType();
   const navigate = useNavigate();
   const [state, thunkDispatch] = useThunkReducer(fetchReducer, initialState);
+  const menuRef = useRef();
   const [pageLoading, setPageLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
@@ -121,6 +123,7 @@ function App() {
                   },
                   ...notificationsQueue,
                 ]);
+                animateMenu(menuRef.current);
               });
           }
         }
@@ -143,6 +146,7 @@ function App() {
                   },
                   ...notificationsQueue,
                 ]);
+                animateMenu(menuRef.current);
               });
           }
           if (message === 'Friend accept') {
@@ -163,6 +167,7 @@ function App() {
                   },
                   ...notificationsQueue,
                 ]);
+                animateMenu(menuRef.current);
               });
           }
         }
@@ -176,6 +181,7 @@ function App() {
         <CurrentUserContext.Provider value={currentUser}>
           <Menu
             loggedIn={loggedIn}
+            menuRef={menuRef}
             notification={notification}
             setNotification={setNotification}
             notificationsQueue={notificationsQueue}
