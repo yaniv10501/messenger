@@ -69,11 +69,11 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
       console.log(currentChat);
       const { friends } = currentChat;
       const listWithImages = friends.map(async (friend) => {
-        const imagePromise = new Promise((resolve) => {
+        const imagePromise = new Promise(async (resolve) => {
           if (friend.image !== 'Uploaded') {
             resolve(friend);
           }
-          mainApi
+          return mainApi
             .getFriendImage(thunkDispatch, friend, {
               listType: 'group',
               chatId: currentChat._id,

@@ -61,81 +61,127 @@ class MainApi {
       const { listType = null, index = null, chatId = null } = options || {};
       if (friend.image !== 'Uploaded') {
         resovle(friend);
-      }
-      const { _id } = friend;
-      useFetch(
-        dispatch,
-        `${this.baseUrl}/${_id}/image?listType=${listType}&index=${index}${
-          chatId && `&chatId=${chatId}`
-        }`,
-        {
-          credentials: 'include',
-        },
-        { silent: true, image: true }
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error();
-          }
-          return response.blob();
-        })
-        .then((imageBlob) => {
-          const image = URL.createObjectURL(imageBlob);
-          return image;
-        })
-        .then((image) => {
-          if (image instanceof Error) {
+      } else {
+        const { _id } = friend;
+        useFetch(
+          dispatch,
+          `${this.baseUrl}/${_id}/image?listType=${listType}&index=${index}${
+            chatId && `&chatId=${chatId}`
+          }`,
+          {
+            credentials: 'include',
+          },
+          { silent: true, image: true }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error();
+            }
+            return response.blob();
+          })
+          .then((imageBlob) => {
+            const image = URL.createObjectURL(imageBlob);
+            return image;
+          })
+          .then((image) => {
+            if (image instanceof Error) {
+              resovle(friend);
+            }
+            resovle({
+              ...friend,
+              image,
+            });
+          })
+          .catch(() => {
             resovle(friend);
-          }
-          console.log(friend);
-          resovle({
-            ...friend,
-            image,
           });
-        })
-        .catch(() => {
-          resovle(friend);
-        });
+      }
     });
     return imagePromise.then((friend) => friend);
   };
+
+  getGroupImage = async (dispatch, group, options) => {
+    const imagePromise = new Promise((resovle) => {
+      const { listType = null } = options || {};
+      if (group.image !== 'Uploaded') {
+        resovle(group);
+      } else {
+        useFetch(
+          dispatch,
+          `${this.baseUrl}/${group._id}/image?listType=${listType}`,
+          {
+            credentials: 'include',
+          },
+          { silent: true, image: true }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error();
+            }
+            return response.blob();
+          })
+          .then((imageBlob) => {
+            const image = URL.createObjectURL(imageBlob);
+            return image;
+          })
+          .then((image) => {
+            if (image instanceof Error) {
+              resovle(group);
+            }
+            resovle({
+              ...group,
+              image,
+            });
+          })
+          .catch(() => {
+            resovle(group);
+          });
+      }
+    });
+    return imagePromise.then((group) => group);
+  };
+
+  getChatImage = (dispatch, chat) =>
+    chat.isGroup
+      ? this.getGroupImage(dispatch, chat, { listType: 'chats' })
+      : this.getFriendImage(dispatch, chat, { listType: 'chats' });
 
   getUserImage = async (dispatch, user) => {
     const imagePromise = new Promise((resovle) => {
       if (user.image !== 'Uploaded') {
         resovle(user);
-      }
-      return useFetch(
-        dispatch,
-        `${this.baseUrl}/users/me/image`,
-        {
-          credentials: 'include',
-        },
-        { silent: true, image: true }
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error();
-          }
-          return response.blob();
-        })
-        .then((imageBlob) => {
-          const image = URL.createObjectURL(imageBlob);
-          return image;
-        })
-        .then((image) => {
-          if (image instanceof Error) {
+      } else {
+        useFetch(
+          dispatch,
+          `${this.baseUrl}/users/me/image`,
+          {
+            credentials: 'include',
+          },
+          { silent: true, image: true }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error();
+            }
+            return response.blob();
+          })
+          .then((imageBlob) => {
+            const image = URL.createObjectURL(imageBlob);
+            return image;
+          })
+          .then((image) => {
+            if (image instanceof Error) {
+              resovle(user);
+            }
+            resovle({
+              ...user,
+              image,
+            });
+          })
+          .catch(() => {
             resovle(user);
-          }
-          console.log(image);
-          resovle({
-            ...user,
-            image,
           });
-        })
-        .catch(() => {
-          resovle(user);
-        });
+      }
     });
     return imagePromise.then((user) => user);
   };
@@ -168,7 +214,7 @@ class MainApi {
       `${this.baseUrl}/new/${chatId}`,
       { credentials: 'include' },
       { silent: true }
-    ).then((response) => this.getFriendImage(dispatch, { _id: chatId, ...response }));
+    ).then((response) => this.getChatImage(dispatch, { _id: chatId, ...response }));
 
   getChats = (dispatch) =>
     useFetch(
@@ -182,18 +228,14 @@ class MainApi {
       const { loadedAll } = response;
       if (!loadedAll) {
         const chatsData = await Promise.all(
-          response.map((friendChat) =>
-            this.getFriendImage(dispatch, friendChat, { listType: 'chats' })
-          )
+          response.map((friendChat) => this.getChatImage(dispatch, friendChat))
         );
         return chatsData;
       }
       const { chatsList } = response;
       if (chatsList) {
         const chatsData = await Promise.all(
-          chatsList.map((friendChat) =>
-            this.getFriendImage(dispatch, friendChat, { listType: 'chats' })
-          )
+          chatsList.map((friendChat) => this.getChatImage(dispatch, friendChat))
         );
         return {
           loadedAll,
@@ -214,18 +256,14 @@ class MainApi {
       const { loadedAll } = response;
       if (!loadedAll) {
         const chatsData = await Promise.all(
-          response.map((friendChat) =>
-            this.getFriendImage(dispatch, friendChat, { listType: 'chats' })
-          )
+          response.map((friendChat) => this.getChatImage(dispatch, friendChat))
         );
         return chatsData;
       }
       const { moreChatsList } = response;
       if (moreChatsList) {
         const chatsData = await Promise.all(
-          moreChatsList.map((friendChat) =>
-            this.getFriendImage(dispatch, friendChat, { listType: 'chats' })
-          )
+          moreChatsList.map((friendChat) => this.getChatImage(dispatch, friendChat))
         );
         return {
           loadedAll,
@@ -521,7 +559,17 @@ class MainApi {
       {
         silent: true,
       }
-    ).then((response) => response);
+    ).then(async (moreFriends) => {
+      const friendsList = await Promise.all(
+        moreFriends.map((friendItem, index) =>
+          this.getFriendImage(dispatch, friendItem, {
+            listType: 'friends',
+            index,
+          })
+        )
+      );
+      return friendsList;
+    });
 }
 
 const mainApi = new MainApi(backEndApi);

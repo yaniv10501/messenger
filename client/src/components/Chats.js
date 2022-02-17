@@ -469,7 +469,34 @@ function Chats({
         }
         if (message === 'New group') {
           const { group } = data;
-          setAllChatsData([group, ...allChatsData]);
+          const { friends } = group;
+          const listWithImages = friends.map(async (friend) => {
+            const imagePromise = new Promise((resolve) => {
+              console.log(friend);
+              if (friend.image !== 'Uploaded') {
+                resolve(friend);
+              }
+              mainApi
+                .getFriendImage(thunkDispatch, friend, {
+                  listType: 'group',
+                  chatId: currentChat._id,
+                })
+                .then((resultFriend) => {
+                  console.log(resultFriend);
+                  resolve(resultFriend);
+                });
+            });
+            return imagePromise.then((result) => result);
+          });
+          Promise.all(listWithImages).then((friendsList) => {
+            setAllChatsData([
+              {
+                ...group,
+                friends: friendsList,
+              },
+              ...allChatsData,
+            ]);
+          });
         }
       };
     }
