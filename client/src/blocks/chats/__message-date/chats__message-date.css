@@ -1,5 +1,6 @@
 .chats__message-date {
-  margin: 0;
+  width: 45px;
+  text-align: left;
   align-self: flex-end;
   margin: 5px 0 0 5px;
   font-size: 14px;

@@ -16,9 +16,8 @@ function FriendCard({
 }) {
   const [buttonText, setButtonText] = useState(buttonReadyText);
   const handleFriendAction = () => {
-    console.log(_id);
     setButtonText(buttonActiveText);
-    friendAction(_id, index);
+    friendAction(_id, index, image);
   };
   return (
     <div className={`add-friends__${classType}-friend-container`} key={_id}>

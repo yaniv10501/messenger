@@ -65,9 +65,7 @@ class MainApi {
         const { _id } = friend;
         useFetch(
           dispatch,
-          `${this.baseUrl}/${_id}/image?listType=${listType}&index=${index}${
-            chatId && `&chatId=${chatId}`
-          }`,
+          `${this.baseUrl}/image/${_id}?listType=${listType}&index=${index}&chatId=${chatId}`,
           {
             credentials: 'include',
           },
@@ -108,7 +106,7 @@ class MainApi {
       } else {
         useFetch(
           dispatch,
-          `${this.baseUrl}/${group._id}/image?listType=${listType}`,
+          `${this.baseUrl}/image/${group._id}?listType=${listType}`,
           {
             credentials: 'include',
           },
@@ -216,6 +214,47 @@ class MainApi {
       { silent: true }
     ).then((response) => this.getChatImage(dispatch, { _id: chatId, ...response }));
 
+  checkLoadedAll = async (dispatch, response, loadedAll, list, callBack, options) => {
+    const { listType = null } = options || {};
+    if (loadedAll) {
+      const data = await Promise.all(
+        list.map((item, index) =>
+          callBack(
+            dispatch,
+            item,
+            options
+              ? {
+                  listType: listType,
+                  index: index,
+                }
+              : {}
+          )
+        )
+      );
+      return {
+        loadedAll,
+        data,
+      };
+    }
+    const data = await Promise.all(
+      response.map((item, index) =>
+        callBack(
+          dispatch,
+          item,
+          options
+            ? {
+                listType: listType,
+                index: index,
+              }
+            : {}
+        )
+      )
+    );
+    return {
+      data,
+    };
+  };
+
   getChats = (dispatch) =>
     useFetch(
       dispatch,
@@ -225,23 +264,18 @@ class MainApi {
       },
       { silent: true }
     ).then(async (response) => {
-      const { loadedAll } = response;
-      if (!loadedAll) {
-        const chatsData = await Promise.all(
-          response.map((friendChat) => this.getChatImage(dispatch, friendChat))
-        );
-        return chatsData;
-      }
-      const { chatsList } = response;
-      if (chatsList) {
-        const chatsData = await Promise.all(
-          chatsList.map((friendChat) => this.getChatImage(dispatch, friendChat))
-        );
-        return {
-          loadedAll,
-          chatsData,
-        };
-      }
+      const { loadedAll: isLoadedAll = false, chatsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        chatsList,
+        this.getChatImage
+      );
+      return {
+        data,
+        loadedAll,
+      };
     });
 
   getMoreChats = (dispatch) =>
@@ -253,30 +287,24 @@ class MainApi {
       },
       { silent: true }
     ).then(async (response) => {
-      const { loadedAll } = response;
-      if (!loadedAll) {
-        const chatsData = await Promise.all(
-          response.map((friendChat) => this.getChatImage(dispatch, friendChat))
-        );
-        return chatsData;
-      }
-      const { moreChatsList } = response;
-      if (moreChatsList) {
-        const chatsData = await Promise.all(
-          moreChatsList.map((friendChat) => this.getChatImage(dispatch, friendChat))
-        );
-        return {
-          loadedAll,
-          chatsData,
-        };
-      }
-      return response;
+      const { loadedAll: isLoadedAll = false, moreChatsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        moreChatsList,
+        this.getChatImage
+      );
+      return {
+        data,
+        loadedAll,
+      };
     });
 
   getMessages = (dispatch, chatId) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${chatId}/messages`,
+      `${this.baseUrl}/messages/${chatId}`,
       {
         credentials: 'include',
       },
@@ -286,7 +314,7 @@ class MainApi {
   getMoreMessages = (dispatch, chatId) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${chatId}/messages/more`,
+      `${this.baseUrl}/messages/more/${chatId}`,
       {
         credentials: 'include',
       },
@@ -296,7 +324,7 @@ class MainApi {
   setUserTyping = (dispatch, chatId, friends) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${chatId}/type`,
+      `${this.baseUrl}/type/${chatId}`,
       {
         method: 'POST',
         headers: {
@@ -313,7 +341,7 @@ class MainApi {
   sendMessage = (dispatch, message, chatId, friends, isMute, isGroup) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${chatId}/message`,
+      `${this.baseUrl}/message/${chatId}`,
       {
         method: 'POST',
         headers: {
@@ -328,7 +356,18 @@ class MainApi {
   leaveChat = (dispatch, chatId) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${chatId}/leave`,
+      `${this.baseUrl}/leave/${chatId}`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      { silent: true }
+    ).then((response) => response);
+
+  leaveChats = (dispatch) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/chats/leave`,
       {
         method: 'POST',
         credentials: 'include',
@@ -343,12 +382,41 @@ class MainApi {
       { credentials: 'include' },
       { silent: true }
     ).then(async (response) => {
-      const friendsList = await Promise.all(
-        response.map((friend, index) =>
-          this.getFriendImage(dispatch, friend, { listType: 'moreFriends', index })
-        )
+      const { loadedAll: isLoadedAll = false, moreFriendsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        moreFriendsList,
+        this.getFriendImage,
+        { listType: 'moreFriends', index: true }
       );
-      return friendsList;
+      return {
+        data,
+        loadedAll,
+      };
+    });
+
+  getMoreMoreFriends = (dispatch, start) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/friends/more?start=${start}`,
+      { credentials: 'include' },
+      { silent: true }
+    ).then(async (response) => {
+      const { loadedAll: isLoadedAll = false, moreFriendsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        moreFriendsList,
+        this.getFriendImage,
+        { listType: 'moreFriends', index: true }
+      );
+      return {
+        data,
+        loadedAll,
+      };
     });
 
   getFriendsRequests = (dispatch) =>
@@ -362,12 +430,45 @@ class MainApi {
         silent: true,
       }
     ).then(async (response) => {
-      const friendRequestsList = await Promise.all(
-        response.map((friendRequest, index) =>
-          this.getFriendImage(dispatch, friendRequest, { listType: 'friendRequests', index })
-        )
+      const { loadedAll: isLoadedAll = false, friendRequestsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        friendRequestsList,
+        this.getFriendImage,
+        { listType: 'friendRequests', index: true }
       );
-      return friendRequestsList;
+      return {
+        data,
+        loadedAll,
+      };
+    });
+
+  getMoreFriendsRequests = (dispatch, start) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/friends/requests?start=${start}`,
+      {
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then(async (response) => {
+      const { loadedAll: isLoadedAll = false, friendRequestsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        friendRequestsList,
+        this.getFriendImage,
+        { listType: 'friendRequests', index: true }
+      );
+      return {
+        data,
+        loadedAll,
+      };
     });
 
   getPendingFriendsRequests = (dispatch) =>
@@ -381,15 +482,45 @@ class MainApi {
         silent: true,
       }
     ).then(async (response) => {
-      const pendingFriendRequestsList = await Promise.all(
-        response.map((pendingFriendRequest, index) =>
-          this.getFriendImage(dispatch, pendingFriendRequest, {
-            listType: 'pendingRequests',
-            index,
-          })
-        )
+      const { loadedAll: isLoadedAll = false, pendingFriendRequestsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        pendingFriendRequestsList,
+        this.getFriendImage,
+        { listType: 'pendingRequests', index: true }
       );
-      return pendingFriendRequestsList;
+      return {
+        data,
+        loadedAll,
+      };
+    });
+
+  getMorePendingFriendsRequests = (dispatch, start) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/friends/pending?start=${start}`,
+      {
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then(async (response) => {
+      const { loadedAll: isLoadedAll = false, pendingFriendRequestsList = [] } = response;
+      const { data, loadedAll = false } = await this.checkLoadedAll(
+        dispatch,
+        response,
+        isLoadedAll,
+        pendingFriendRequestsList,
+        this.getFriendImage,
+        { listType: 'pendingRequests', index: true }
+      );
+      return {
+        data,
+        loadedAll,
+      };
     });
 
   getAddFriends = async (dispatch) => {
@@ -419,7 +550,7 @@ class MainApi {
   acceptFriendRequest = (dispatch, requestId, index) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${requestId}/accept?index=${index}`,
+      `${this.baseUrl}/accept/${requestId}?index=${index}`,
       {
         credentials: 'include',
         method: 'POST',
@@ -488,7 +619,7 @@ class MainApi {
   setFriendMute = (dispatch, friendId) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${friendId}/mute`,
+      `${this.baseUrl}/mute/${friendId}`,
       {
         method: 'POST',
         credentials: 'include',
@@ -501,7 +632,7 @@ class MainApi {
   setGroupImage = (dispatch, chatId, uploadedImage) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${chatId}/image`,
+      `${this.baseUrl}/image/${chatId}`,
       {
         method: 'PATCH',
         body: uploadedImage,
@@ -552,7 +683,7 @@ class MainApi {
   getMoreGroupFriends = (dispatch, groupId) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/${groupId}/friends/more`,
+      `${this.baseUrl}/friends/more/${groupId}`,
       {
         credentials: 'include',
       },

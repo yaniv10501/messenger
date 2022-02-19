@@ -11,3 +11,9 @@ span[class = settings__profile-info] {
   box-shadow: none;
   background-color: transparent;
 }
+
+@media screen and (max-width: 945px) {
+  .settings__profile-info {
+    width: 95%;
+  }
+}

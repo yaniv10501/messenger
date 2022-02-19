@@ -90,10 +90,14 @@
 @import url('./blocks/chats/__friend-header-texts/chats__friend-header-texts.css');
 @import url('./blocks/chats/__friend-header-name/chats____friend-header-name.css');
 @import url('./blocks/chats/__friend-header-typing/chats__friend-header-typing.css');
+@import url('./blocks/chats/__friend-header-bottom-title/chats__friend-header-bottom-title.css');
+@import url('./blocks/chats/__friend-header-bottom-text/chats__friend-header-bottom-text.css');
 @import url('./blocks/chats/__messages-container/chats__messages-container.css');
 @import url('./blocks/chats/__message/chats__message.css');
 @import url('./blocks/chats/__message/_user/chats__message_user.css');
 @import url('./blocks/chats/__message/_friend/chats__message_friend.css');
+@import url('./blocks/chats/__message-by/chats__message-by.css');
+@import url('./blocks/chats/__message-content/chats__message-content.css');
 @import url('./blocks/chats/__message-text/chats__message-text.css');
 @import url('./blocks/chats/__message-date/chats__message-date.css');
 @import url('./blocks/chats/__send-form/chats__send-form.css');
@@ -121,6 +125,7 @@
 @import url('./blocks/settings/__subtitle/settings__subtitle.css');
 @import url('./blocks/settings/__profile-container/settings__profile-container.css');
 @import url('./blocks/settings/__user-container/settings__user-container.css');
+@import url('./blocks/settings/__profile-form/settings__profile-form.css');
 @import url('./blocks/settings/__profile-image/settings__profile-image.css');
 @import url('./blocks/settings/__input-file/settings__input-file.css');
 @import url('./blocks/settings/__profile-name/settings__profile-name.css');

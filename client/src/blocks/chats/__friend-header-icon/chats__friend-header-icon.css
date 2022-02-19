@@ -4,3 +4,9 @@
   margin: 5px 15px 15px 5px;
   border-radius: 50%;
 }
+
+@media screen and (max-width: 945px) {
+  .chats__friend-header-icon {
+    margin: 15px 15px 5px 5px;
+  }
+}

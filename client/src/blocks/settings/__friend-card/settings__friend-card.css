@@ -1,8 +1,10 @@
 .settings__friend-card {
+  max-width: 500px;
   background-color: var(--whiteColor);
   box-shadow: 0 0 2px 2px var(--blackColor);
   border-radius: 25px;
   padding: 10px;
   margin-bottom: 20px;
   display: flex;
+  justify-content: center;
 }

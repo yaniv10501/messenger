@@ -1,4 +1,5 @@
 import React, { createRef, useCallback, useEffect, useRef, useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { useNavigate } from 'react-router-dom';
 import composeIcon from '../images/compose.png';
 import sendIcon from '../images/send.png';
@@ -24,6 +25,9 @@ function Chats({
   setIsGroupSettingsPopupOpen,
   closeAllPopups,
 }) {
+  const isMobile = useMediaQuery({
+    query: '(max-width: 945px)',
+  });
   const messagesPreloaderRef = useRef();
   const messagesContainerRef = useRef();
   const chatPreloaderRef = useRef();
@@ -36,12 +40,34 @@ function Chats({
   const [friendsList, setFriendsList] = useState([]);
   const [allChatsData, setAllChatsData] = useState([]);
   const [currentChat, setCurrentChat] = useState({});
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [messageInput, setMessageInput] = useState('');
   const [isUserTyping, setIsUserTyping] = useState([]);
   const [userTypingText, setUserTypingText] = useState('');
   const [typingTimer, setTypingTimer] = useState(null);
   const [chatTypingTimers, setChatTypingTimers] = useState([]);
   const [refsArray, setRefsArray] = useState([]);
+
+  const handleMobileBack = () => {
+    setIsChatOpen(false);
+    setCurrentChat({});
+  };
+
+  const createNewGroup = (chatId, chatName, friends, image) => {
+    setAllChatsData([
+      {
+        _id: chatId,
+        chatName,
+        friends,
+        groupAdmin: '',
+        image: '',
+        isGroup: true,
+        isMute: 0,
+        unreadCount: 0,
+      },
+      ...allChatsData,
+    ]);
+  };
 
   const handleChange = (event) => {
     const { _id: chatId, friends } = currentChat;
@@ -132,11 +158,16 @@ function Chats({
         setLoadedAllMessages(false);
       }
       if (isGroup) {
+        let subtitle = '';
+        friends.forEach((friend) => {
+          subtitle = subtitle.concat(`${friend.firstName} ${friend.lastName}, `);
+        });
         setCurrentChat({
           ...result,
           friends,
           isGroup,
           groupAdmin,
+          subtitle,
           chatName,
           chatImage,
           isMute,
@@ -152,6 +183,7 @@ function Chats({
           isMute,
         });
       }
+      setIsChatOpen(true);
     });
   };
   const handleOpenCompose = () => {
@@ -197,8 +229,14 @@ function Chats({
       setFriendsList(friendsListResult);
     });
   };
-  const handleBack = () => navigate('/');
+  const handleBack = () => {
+    mainApi.leaveChats(thunkDispatch).then((result) => {
+      console.log(result);
+      navigate('/');
+    });
+  };
   const handleMessagesScroll = (event) => {
+    console.log(loadedAllMessages);
     if (!loadedAllMessages) {
       if (!silentLoading) {
         const {
@@ -211,16 +249,13 @@ function Chats({
           console.log('Time to load more!');
           if (!loadedAllMessages) {
             mainApi.getMoreMessages(thunkDispatch, currentChat._id).then((moreMessages) => {
-              if (moreMessages.length < 1) {
-                setLoadedAllMessages(true);
-              }
-              if (moreMessages.length > 0) {
-                const { messages: currentChatMessages } = currentChat;
-                setCurrentChat({
-                  ...currentChat,
-                  messages: [...currentChatMessages, ...moreMessages],
-                });
-              }
+              console.log(moreMessages);
+              const { messages: currentChatMessages } = currentChat;
+              setCurrentChat({
+                ...currentChat,
+                messages: [...currentChatMessages, ...moreMessages.messages],
+              });
+              setLoadedAllMessages(moreMessages.loadedAll || false);
             });
           }
         }
@@ -240,17 +275,8 @@ function Chats({
         if (offsetTop - (scrollTop + offsetHeight) < 180) {
           console.log('Time to load more!');
           mainApi.getMoreChats(thunkDispatch).then((moreChats) => {
-            const { loadedAll, chatsData } = moreChats;
-            console.log(chatsData);
-            console.log(loadedAll);
-            if (loadedAll) {
-              console.log('Loaded all!');
-              setAllChatsData([...allChatsData, ...chatsData]);
-              setLoadedAllChats(true);
-            }
-            if (!loadedAll) {
-              setAllChatsData([...allChatsData, ...moreChats]);
-            }
+            setAllChatsData([...allChatsData, ...moreChats.data]);
+            setLoadedAllChats(moreChats.loadedAll);
           });
         }
       }
@@ -258,12 +284,12 @@ function Chats({
   };
   const updateMessages = useCallback(
     (data) => {
-      const { message: newMessage, chatId } = data;
+      const { message: newMessage, chatId, user } = data;
       const { messages: currentChatMessages } = currentChat;
 
       const currentChatData = allChatsData.find((chat) => chat._id === chatId);
       if (!currentChatData) {
-        const { chatName, chatImage } = currentChat;
+        const { _id, chatName, chatImage } = currentChat;
         if (!chatName) {
           mainApi.getNewChat(thunkDispatch, chatId).then((friend) => {
             console.log(friend);
@@ -288,10 +314,12 @@ function Chats({
             unreadCount: 1,
           };
           setAllChatsData([newFriendChatData, ...allChatsData]);
-          setCurrentChat({
-            ...currentChat,
-            messages: [newMessage],
-          });
+          if (_id === chatId) {
+            setCurrentChat({
+              ...currentChat,
+              messages: [newMessage],
+            });
+          }
         }
       }
       if (currentChatData) {
@@ -306,8 +334,7 @@ function Chats({
         const newAllChatsData = allChatsData.filter((chat) => chat._id !== chatId);
         setAllChatsData([newFriendChatData, ...newAllChatsData]);
       }
-
-      if (currentChat._id) {
+      if (currentChat._id === chatId) {
         if (!currentChatMessages) {
           setCurrentChat({
             ...currentChat,
@@ -343,13 +370,20 @@ function Chats({
       chatWebSocket.onmessage = (wsMessage) => {
         const { message, data } = JSON.parse(wsMessage.data);
         if (message === 'New message') {
-          const { chatId } = data;
+          const { chatId, message } = data;
           const chatTypingTimer = chatTypingTimers.find((chatTimer) => chatTimer._id === chatId);
           if (chatTypingTimer) {
             const { timer, interval } = chatTypingTimer;
+            const newChatTimers = chatTypingTimers.filter((chatTimer) => chatTimer._id !== chatId);
+            const chatRef = refsArray.find((ref) => ref._id === chatId);
+            if (chatRef) {
+              const {
+                ref: { current: lastMessageTarget },
+              } = chatRef;
+              lastMessageTarget.textContent = message.messageContent;
+            }
             clearTimeout(timer);
             clearInterval(interval);
-            const newChatTimers = chatTypingTimers.filter((chatTimer) => chatTimer._id !== chatId);
             setChatTypingTimers(newChatTimers);
           }
           updateMessages(data);
@@ -549,204 +583,439 @@ function Chats({
   /** Loading init data */
   useEffect(() => {
     mainApi.getChats(thunkDispatch).then((response) => {
-      const { loadedAll, chatsData } = response;
       console.log(response);
-      if (loadedAll) {
-        setAllChatsData(chatsData);
-        setLoadedAllChats(true);
-      }
-      if (!loadedAll) {
-        setAllChatsData(response);
-      }
+      const { loadedAll, data } = response;
+      setAllChatsData(data);
+      setLoadedAllChats(loadedAll);
     });
   }, []);
   return (
     <>
-      <div className="chats">
-        <div className="chats__contacts">
-          <div className="chats__contacts-top">
-            <button className="chats__group-title" onClick={handleOpenNewGroup}>
-              New group
-            </button>
-            <button className="chats__compose-button" onClick={handleOpenCompose}>
-              <img
-                src={composeIcon}
-                width="50"
-                height="50"
-                className="chats__compose-icon"
-                alt="compose icon"
-              />
-            </button>
-
-            <h1 className="chats__title">Chats</h1>
-
-            <div className="chats__back-button" onClick={handleBack}>
-              <p className="chats__back-title">Back</p>
-            </div>
-          </div>
-
-          <div className="chats__contacts-main no-scroll-bar" onScroll={handleChatsScroll}>
-            {allChatsData.map(
-              (
-                {
-                  _id,
-                  chatName,
-                  image,
-                  isGroup,
-                  groupAdmin,
-                  friends,
-                  lastMessage,
-                  lastMessageTime,
-                  unreadCount,
-                  isMute,
-                },
-                index
-              ) => (
-                <div
-                  className="chats__chat-link"
-                  key={_id}
-                  id={_id}
-                  onClick={() =>
-                    handleChatClick(_id, chatName, image, isMute, isGroup, groupAdmin, friends)
-                  }
-                >
-                  <img
-                    className="chats__friend-icon"
-                    src={image ? image : noProfile}
-                    alt="friend icon"
-                  />
-
-                  <div className="chats__chat-row">
-                    <div className="chats__chat-column">
-                      <p className="chats__chat-title">{chatName}</p>
-
-                      {refsArray[index] ? (
-                        <p className="chats__chat-message" ref={refsArray[index].ref}>
-                          {lastMessage}
-                        </p>
-                      ) : (
-                        <p className="chats__chat-message">{lastMessage}</p>
-                      )}
+      {isMobile ? (
+        isChatOpen ? (
+          <div className="chats">
+            <div className="chats__chat-messages-container">
+              {currentChat.messages ? (
+                <>
+                  <div className="chats__messages-header_mobile">
+                    <div
+                      className="chats__back-button chats__back-button_mobile"
+                      onClick={handleMobileBack}
+                    >
+                      <p className="chats__back-title">Back</p>
                     </div>
+                    <button
+                      className="chats__messages-header"
+                      key={currentChat._id}
+                      onClick={
+                        currentChat.isGroup ? handleOpenGroupSettings : handleOpenChatSettings
+                      }
+                    >
+                      <img
+                        src={currentChat.chatImage ? currentChat.chatImage : noProfile}
+                        className="chats__friend-header-icon"
+                        alt="friend icon"
+                      />
+                      <div className="chats__friend-header-texts">
+                        <h2 className="chats__friend-header-name">{currentChat.chatName}</h2>
+                        <p className="chats__friend-header-typing">
+                          {isUserTyping.some((isUser) =>
+                            isUser._id === currentChat._id ? isUser.isTyping : false
+                          ) && userTypingText}
+                        </p>
+                        {currentChat.isGroup && (
+                          <p className="chats__friend-header-bottom-title">
+                            Friends:
+                            <span className="chats__friend-header-bottom-text">
+                              {currentChat.subtitle}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  </div>
 
-                    <div className="chats__chat-end-column">
-                      <p className="chats__chat-time">{lastMessageTime}</p>
+                  <div
+                    id="messagesContainer"
+                    className="chats__messages-container no-scroll-bar"
+                    ref={messagesContainerRef}
+                    onScroll={handleMessagesScroll}
+                  >
+                    {currentChat.messages.length > 0
+                      ? currentChat.messages.map(
+                          (
+                            { messageByUser, messageBy, messageContent, messageTime, messageDate },
+                            index
+                          ) => {
+                            if (messageByUser)
+                              return (
+                                <div className="chats__message chats__message_user" key={index}>
+                                  <div className="chats__message-content">
+                                    <p className="chats__message-text">{messageContent}</p>
 
-                      {isMute ? (
-                        <img className="chats__chat-mute" src="/mute.png" alt="chat mute" />
-                      ) : null}
+                                    <p className="chats__message-date">{messageTime}</p>
+                                  </div>
+                                </div>
+                              );
+                            else
+                              return (
+                                <div className="chats__message chats__message_friend" key={index}>
+                                  {currentChat.isGroup && (
+                                    <p className="chats__message-by">{messageBy}</p>
+                                  )}
+                                  <div className="chats__message-content">
+                                    <p className="chats__message-text">{messageContent}</p>
 
-                      {unreadCount > 0 ? (
-                        <div className="chats__chat-unread">
-                          <p className="chats__chat-unread-count">{unreadCount}</p>
-                        </div>
-                      ) : null}
+                                    <p className="chats__message-date">{messageTime}</p>
+                                  </div>
+                                </div>
+                              );
+                          }
+                        )
+                      : ''}
+                    <div
+                      className="chats__preloader"
+                      ref={messagesPreloaderRef}
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        minHeight: '70px',
+                      }}
+                    >
+                      <Preloader isLoading={!loadedAllMessages} />
                     </div>
                   </div>
-                </div>
-              )
-            )}
-            <div
-              className="chats__preloader"
-              ref={chatPreloaderRef}
-              style={{
-                position: 'relative',
-                width: '100%',
-                minHeight: '70px',
-              }}
-            >
-              <Preloader isLoading={!loadedAllChats} />
+
+                  <form
+                    className="chats__send-form"
+                    name="message"
+                    onSubmit={handleSubmit}
+                    id={currentChat.friendId}
+                  >
+                    <textarea
+                      className="chats__message-input"
+                      value={messageInput}
+                      onChange={handleChange}
+                      onKeyPress={handleKey}
+                    ></textarea>
+
+                    <button type="submit" className="chats__send-button">
+                      <img src={sendIcon} className="chats__send-icon" alt="send-icon" />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                ''
+              )}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="chats">
+            <div className="chats__contacts">
+              <div className="chats__contacts-top">
+                <button className="chats__group-title" onClick={handleOpenNewGroup}>
+                  New group
+                </button>
+                <button className="chats__compose-button" onClick={handleOpenCompose}>
+                  <img
+                    src={composeIcon}
+                    width="50"
+                    height="50"
+                    className="chats__compose-icon"
+                    alt="compose icon"
+                  />
+                </button>
 
-        <div className="chats__chat-messages-container">
-          {currentChat.messages ? (
-            <>
-              <button
-                className="chats__messages-header"
-                key={currentChat._id}
-                onClick={currentChat.isGroup ? handleOpenGroupSettings : handleOpenChatSettings}
-              >
-                <img
-                  src={currentChat.chatImage ? currentChat.chatImage : noProfile}
-                  className="chats__friend-header-icon"
-                  alt="friend icon"
-                />
-                <div className="chats__friend-header-texts">
-                  <h2 className="chats__friend-header-name">{currentChat.chatName}</h2>
-                  <p className="chats__friend-header-typing">
-                    {isUserTyping.some((isUser) =>
-                      isUser._id === currentChat._id ? isUser.isTyping : false
-                    ) && userTypingText}
-                  </p>
+                <h1 className="chats__title">Chats</h1>
+
+                <div className="chats__back-button" onClick={handleBack}>
+                  <p className="chats__back-title">Back</p>
                 </div>
-              </button>
+              </div>
 
-              <div
-                id="messagesContainer"
-                className="chats__messages-container no-scroll-bar"
-                ref={messagesContainerRef}
-                onScroll={handleMessagesScroll}
-              >
-                {currentChat.messages.length > 0
-                  ? currentChat.messages.map(
-                      ({ messageByUser, messageContent, messageTime, messageDate }, index) => {
-                        if (messageByUser)
-                          return (
-                            <div className="chats__message chats__message_user" key={index}>
-                              <p className="chats__message-text">{messageContent}</p>
-
-                              <p className="chats__message-date">{messageTime}</p>
-                            </div>
-                          );
-                        else
-                          return (
-                            <div className="chats__message chats__message_friend" key={index}>
-                              <p className="chats__message-text">{messageContent}</p>
-
-                              <p className="chats__message-date">{messageTime}</p>
-                            </div>
-                          );
+              <div className="chats__contacts-main no-scroll-bar" onScroll={handleChatsScroll}>
+                {allChatsData.map(
+                  (
+                    {
+                      _id,
+                      chatName,
+                      image,
+                      isGroup,
+                      groupAdmin,
+                      friends,
+                      lastMessage,
+                      lastMessageTime,
+                      unreadCount,
+                      isMute,
+                    },
+                    index
+                  ) => (
+                    <div
+                      className="chats__chat-link"
+                      key={_id}
+                      id={_id}
+                      onClick={() =>
+                        handleChatClick(_id, chatName, image, isMute, isGroup, groupAdmin, friends)
                       }
-                    )
-                  : ''}
+                    >
+                      <img
+                        className="chats__friend-icon"
+                        src={image ? image : noProfile}
+                        alt="friend icon"
+                      />
+
+                      <div className="chats__chat-row">
+                        <div className="chats__chat-column">
+                          <p className="chats__chat-title">{chatName}</p>
+
+                          {refsArray[index] ? (
+                            <p className="chats__chat-message" ref={refsArray[index].ref}>
+                              {lastMessage}
+                            </p>
+                          ) : (
+                            <p className="chats__chat-message">{lastMessage}</p>
+                          )}
+                        </div>
+
+                        <div className="chats__chat-end-column">
+                          <p className="chats__chat-time">{lastMessageTime}</p>
+
+                          {isMute ? (
+                            <img className="chats__chat-mute" src="/mute.png" alt="chat mute" />
+                          ) : null}
+
+                          {unreadCount > 0 ? (
+                            <div className="chats__chat-unread">
+                              <p className="chats__chat-unread-count">{unreadCount}</p>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
                 <div
                   className="chats__preloader"
-                  ref={messagesPreloaderRef}
+                  ref={chatPreloaderRef}
                   style={{
                     position: 'relative',
                     width: '100%',
                     minHeight: '70px',
                   }}
                 >
-                  <Preloader isLoading={!loadedAllMessages} />
+                  <Preloader isLoading={!loadedAllChats} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      ) : (
+        <>
+          <div className="chats">
+            <div className="chats__contacts">
+              <div className="chats__contacts-top">
+                <button className="chats__group-title" onClick={handleOpenNewGroup}>
+                  New group
+                </button>
+                <button className="chats__compose-button" onClick={handleOpenCompose}>
+                  <img
+                    src={composeIcon}
+                    width="50"
+                    height="50"
+                    className="chats__compose-icon"
+                    alt="compose icon"
+                  />
+                </button>
+
+                <h1 className="chats__title">Chats</h1>
+
+                <div className="chats__back-button" onClick={handleBack}>
+                  <p className="chats__back-title">Back</p>
                 </div>
               </div>
 
-              <form
-                className="chats__send-form"
-                name="message"
-                onSubmit={handleSubmit}
-                id={currentChat.friendId}
-              >
-                <textarea
-                  className="chats__message-input"
-                  value={messageInput}
-                  onChange={handleChange}
-                  onKeyPress={handleKey}
-                ></textarea>
+              <div className="chats__contacts-main no-scroll-bar" onScroll={handleChatsScroll}>
+                {allChatsData.map(
+                  (
+                    {
+                      _id,
+                      chatName,
+                      image,
+                      isGroup,
+                      groupAdmin,
+                      friends,
+                      lastMessage,
+                      lastMessageTime,
+                      unreadCount,
+                      isMute,
+                    },
+                    index
+                  ) => (
+                    <div
+                      className="chats__chat-link"
+                      key={_id}
+                      id={_id}
+                      onClick={() =>
+                        handleChatClick(_id, chatName, image, isMute, isGroup, groupAdmin, friends)
+                      }
+                    >
+                      <img
+                        className="chats__friend-icon"
+                        src={image ? image : noProfile}
+                        alt="friend icon"
+                      />
 
-                <button type="submit" className="chats__send-button">
-                  <img src={sendIcon} className="chats__send-icon" alt="send-icon" />
-                </button>
-              </form>
-            </>
-          ) : (
-            ''
-          )}
-        </div>
-      </div>
+                      <div className="chats__chat-row">
+                        <div className="chats__chat-column">
+                          <p className="chats__chat-title">{chatName}</p>
+
+                          {refsArray[index] ? (
+                            <p className="chats__chat-message" ref={refsArray[index].ref}>
+                              {lastMessage}
+                            </p>
+                          ) : (
+                            <p className="chats__chat-message">{lastMessage}</p>
+                          )}
+                        </div>
+
+                        <div className="chats__chat-end-column">
+                          <p className="chats__chat-time">{lastMessageTime}</p>
+
+                          {isMute ? (
+                            <img className="chats__chat-mute" src="/mute.png" alt="chat mute" />
+                          ) : null}
+
+                          {unreadCount > 0 ? (
+                            <div className="chats__chat-unread">
+                              <p className="chats__chat-unread-count">{unreadCount}</p>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
+                <div
+                  className="chats__preloader"
+                  ref={chatPreloaderRef}
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    minHeight: '70px',
+                  }}
+                >
+                  <Preloader isLoading={!loadedAllChats} />
+                </div>
+              </div>
+            </div>
+
+            <div className="chats__chat-messages-container">
+              {currentChat.messages ? (
+                <>
+                  <button
+                    className="chats__messages-header"
+                    key={currentChat._id}
+                    onClick={currentChat.isGroup ? handleOpenGroupSettings : handleOpenChatSettings}
+                  >
+                    <img
+                      src={currentChat.chatImage ? currentChat.chatImage : noProfile}
+                      className="chats__friend-header-icon"
+                      alt="friend icon"
+                    />
+                    <div className="chats__friend-header-texts">
+                      <h2 className="chats__friend-header-name">{currentChat.chatName}</h2>
+                      <p className="chats__friend-header-typing">
+                        {isUserTyping.some((isUser) =>
+                          isUser._id === currentChat._id ? isUser.isTyping : false
+                        ) && userTypingText}
+                      </p>
+                      {currentChat.isGroup && (
+                        <p className="chats__friend-header-bottom-title">
+                          Friends:
+                          <span className="chats__friend-header-bottom-text">
+                            {currentChat.subtitle}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  </button>
+
+                  <div
+                    id="messagesContainer"
+                    className="chats__messages-container no-scroll-bar"
+                    ref={messagesContainerRef}
+                    onScroll={handleMessagesScroll}
+                  >
+                    {currentChat.messages.length > 0
+                      ? currentChat.messages.map(
+                          (
+                            { messageByUser, messageBy, messageContent, messageTime, messageDate },
+                            index
+                          ) => {
+                            if (messageByUser)
+                              return (
+                                <div className="chats__message chats__message_user" key={index}>
+                                  <div className="chats__message-content">
+                                    <p className="chats__message-text">{messageContent}</p>
+
+                                    <p className="chats__message-date">{messageTime}</p>
+                                  </div>
+                                </div>
+                              );
+                            else
+                              return (
+                                <div className="chats__message chats__message_friend" key={index}>
+                                  {currentChat.isGroup && (
+                                    <p className="chats__message-by">{messageBy}</p>
+                                  )}
+                                  <div className="chats__message-content">
+                                    <p className="chats__message-text">{messageContent}</p>
+
+                                    <p className="chats__message-date">{messageTime}</p>
+                                  </div>
+                                </div>
+                              );
+                          }
+                        )
+                      : ''}
+                    <div
+                      className="chats__preloader"
+                      ref={messagesPreloaderRef}
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        minHeight: '70px',
+                      }}
+                    >
+                      <Preloader isLoading={!loadedAllMessages} />
+                    </div>
+                  </div>
+
+                  <form
+                    className="chats__send-form"
+                    name="message"
+                    onSubmit={handleSubmit}
+                    id={currentChat.friendId}
+                  >
+                    <textarea
+                      className="chats__message-input"
+                      value={messageInput}
+                      onChange={handleChange}
+                      onKeyPress={handleKey}
+                    ></textarea>
+
+                    <button type="submit" className="chats__send-button">
+                      <img src={sendIcon} className="chats__send-icon" alt="send-icon" />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                ''
+              )}
+            </div>
+          </div>
+        </>
+      )}
       <ComposePopup
         isPopupOpen={isComposePopupOpen}
         handleClose={closeAllPopups}
@@ -758,6 +1027,7 @@ function Chats({
         handleClose={closeAllPopups}
         friendsList={friendsList}
         initNewChat={initNewChat}
+        createNewGroup={createNewGroup}
       />
       <ChatSettingsPopup
         currentChat={currentChat}

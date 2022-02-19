@@ -6,3 +6,9 @@
   flex-direction: column;
   border-right: 5px solid var(--blackColor);
 }
+
+@media screen and (max-width: 945px) {
+  .chats__contacts {
+    width: 100%
+  }
+}

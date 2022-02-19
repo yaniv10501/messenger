@@ -4,3 +4,10 @@
   box-shadow: 0 0 2px 1px var(--blackColor);
   background-color: var(--platinumColor);
 }
+
+@media screen and (max-width: 945px) {
+  .settings__profile-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}

@@ -117,7 +117,7 @@ function UserSettings({ setCurrentUser }) {
               onChange={handleNewFile}
             ></input>
           </label>
-          <form onSubmit={(event) => event.preventDefault()} noValidate>
+          <form className="settings__profile-form" onSubmit={(event) => event.preventDefault()} noValidate>
             <p className="settings__profile-name">
               Name
               <span className="settings__profile-info">{name}</span>

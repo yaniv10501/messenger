@@ -1,0 +1,7 @@
+.chats__message-by {
+  color: var(--blueColor);
+  margin: 0;
+  padding: 3px;
+  font-size: 14px;
+  font-weight: 700;
+}

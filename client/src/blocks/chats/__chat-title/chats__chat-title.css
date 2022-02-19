@@ -3,4 +3,8 @@
   color: var(--blackColor);
   font-size: 24px;
   font-weight: 600;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }

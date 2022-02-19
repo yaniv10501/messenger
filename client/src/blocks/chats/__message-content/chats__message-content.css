@@ -1,0 +1,5 @@
+.chats__message-content {
+  display: inline-flex;
+  justify-content: space-between;
+  padding: 0 5px;
+}

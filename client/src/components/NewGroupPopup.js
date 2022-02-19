@@ -5,8 +5,14 @@ import noProfile from '../images/no-profile.png';
 import closeIcon from '../images/close-icon.svg';
 import mainApi from '../utils/MainApi';
 
-function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, friendsList } }) {
+function NewGroupPopup({
+  handleClose,
+  isPopupOpen,
+  friendsList: { groupId, friendsList },
+  createNewGroup,
+}) {
   const [state, thunkDispatch] = useThunkReducer(fetchReducer, initialState);
+  const { silentLoading } = state;
   const [errorMessage, setErrorMessage] = useState('');
   const [groupName, setGroupName] = useState('');
   const [groupImage, setGroupImage] = useState(null);
@@ -30,7 +36,7 @@ function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, frien
     tempData.append('groupPic', image, image.name);
     setFormData(tempData);
   };
-  const addFriendToGroup = (event, _id, friendName) => {
+  const addFriendToGroup = (event, _id, firstName, lastName, image) => {
     if (selectedFriends.length < 1 && groupName !== '' && errorMessage !== '') {
       setErrorMessage('');
     }
@@ -42,9 +48,8 @@ function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, frien
     }
     if (textContent === 'Add') {
       target.textContent = 'Added';
-      setSelectedFriends([{ _id, friendName }, ...selectedFriends]);
+      setSelectedFriends([{ _id, firstName, lastName, image }, ...selectedFriends]);
     }
-    console.log(_id, friendName);
   };
   const removeSelectedFriend = (_id) => {
     setSelectedFriends(selectedFriends.filter(({ _id: friendId }) => friendId !== _id));
@@ -66,7 +71,10 @@ function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, frien
     }
     mainApi
       .initNewGroup(thunkDispatch, groupId, groupName, formData, selectedFriends)
-      .then((response) => console.log(response));
+      .then((response) => {
+        handleClose();
+        createNewGroup(groupId, groupName, selectedFriends, formData)
+      });
   };
   useEffect(() => {
     if (friendsList) {
@@ -83,6 +91,7 @@ function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, frien
       popupTitle="Create a new group"
       popupBottomLink=""
       setLinkPopupOpen={() => {}}
+      isLoading={silentLoading}
     >
       <form className="popup__new-group-form" onSubmit={handleSubmit}>
         <div className="popup__new-group-details">
@@ -118,9 +127,9 @@ function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, frien
           <ul className="popup__new-group-selcted-friends no-scroll-bar">
             {selectedFriends &&
               selectedFriends.length > 0 &&
-              selectedFriends.map(({ _id, friendName }) => (
+              selectedFriends.map(({ _id, firstName, lastName }) => (
                 <li className="popup__new-group-selcted-friend" key={_id}>
-                  <p className="popup__new-group-selcted-friend-name">{friendName}</p>
+                  <p className="popup__new-group-selcted-friend-name">{firstName} {lastName}</p>
                   <button
                     className="popup__new-group-diselect-friend-button"
                     onClick={() => removeSelectedFriend(_id)}
@@ -159,7 +168,7 @@ function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, frien
                         className="popup__new-group-friend-add-button"
                         type="button"
                         onClick={(event) =>
-                          addFriendToGroup(event, _id, `${firstName} ${lastName}`)
+                          addFriendToGroup(event, _id, firstName, lastName, image)
                         }
                         ref={refsArray[index].ref}
                       >
@@ -170,7 +179,7 @@ function NewGroupPopup({ handleClose, isPopupOpen, friendsList: { groupId, frien
                         className="popup__new-group-friend-add-button"
                         type="button"
                         onClick={(event) =>
-                          addFriendToGroup(event, _id, `${firstName} ${lastName}`)
+                          addFriendToGroup(event, _id, firstName, lastName, image)
                         }
                       >
                         Add

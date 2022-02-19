@@ -4,3 +4,9 @@
   display: flex;
   flex-direction: column;
 }
+
+@media screen and (max-width: 945px) {
+  .chats__chat-messages-container {
+    width: 100%;
+  }
+}

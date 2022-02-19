@@ -13,3 +13,8 @@
 .chats__back-button:hover {
   opacity: 0.7;
 }
+
+.chats__back-button_mobile {
+  align-self: flex-start;
+  margin: 10px 0 0 10px;
+}

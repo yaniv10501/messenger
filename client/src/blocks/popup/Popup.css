@@ -32,6 +32,7 @@
   box-sizing: border-box;
   position: relative;
   width: 650px;
+  height: 60%;
   background-color: #fff;
   border-radius: 16px;
   box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.15);
@@ -40,6 +41,8 @@
 }
 
 .popup__main {
+  height: 0;
+  min-height: calc(100% - 60px);
   display: flex;
   flex-direction: column;
 }
@@ -542,6 +545,10 @@
 .popup__new-group-error {
   color: var(--redColor);
   margin: 15px 0 0 10px;
+}
+
+.popup__main_hidden {
+  visibility: hidden;
 }
 
 @media screen and (max-width: 495px) {

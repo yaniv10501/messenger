@@ -1,4 +1,6 @@
 .chats__message-text {
+  min-width: 50px;
+  width: calc(100% - 50px);
   margin: 0;
   font-size: 24px;
   font-weight: 500;

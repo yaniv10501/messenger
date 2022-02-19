@@ -101,13 +101,18 @@ function App() {
     if (chatWebSocket) {
       chatWebSocket.onmessage = (wsMessage) => {
         const { message, data } = JSON.parse(wsMessage.data);
+        console.log(data);
         if (location.pathname !== '/chats') {
           if (message === 'New message') {
             const friend = data.user;
             mainApi
-              .getFriendImage(thunkDispatch, friend, {
-                listType: 'messageNotif',
-              })
+              .getFriendImage(
+                thunkDispatch,
+                { ...friend, _id: data.chatId },
+                {
+                  listType: 'messageNotif',
+                }
+              )
               .then((friendWithImage) => {
                 console.log(friendWithImage);
                 setNotification({
@@ -131,7 +136,7 @@ function App() {
           if (message === 'Friend request') {
             mainApi
               .getFriendImage(thunkDispatch, data, {
-                listType: 'messageNotif',
+                listType: 'pendingRequests',
               })
               .then((friendWithImage) => {
                 console.log(friendWithImage);
@@ -152,7 +157,7 @@ function App() {
           if (message === 'Friend accept') {
             mainApi
               .getFriendImage(thunkDispatch, data, {
-                listType: 'messageNotif',
+                listType: 'friends',
               })
               .then((friendWithImage) => {
                 console.log(friendWithImage);
