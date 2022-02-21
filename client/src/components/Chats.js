@@ -692,7 +692,6 @@ function Chats({
                     className="chats__send-form"
                     name="message"
                     onSubmit={handleSubmit}
-                    id={currentChat.friendId}
                   >
                     <textarea
                       className="chats__message-input"
@@ -931,13 +930,20 @@ function Chats({
                           isUser._id === currentChat._id ? isUser.isTyping : false
                         ) && userTypingText}
                       </p>
-                      {currentChat.isGroup && (
+                      {currentChat.isGroup ? (
                         <p className="chats__friend-header-bottom-title">
                           Friends:
                           <span className="chats__friend-header-bottom-text">
                             {currentChat.subtitle}
                           </span>
                         </p>
+                      ) : (
+                        <p className="chats__friend-header-bottom-title">
+                        {currentChat.friends[0].isOnline ? 'Online' : currentChat.chatName}
+                        <span className="chats__friend-header-bottom-text">
+                          {currentChat.friends[0].isOnline ? '' : 'Was online'}
+                        </span>
+                      </p>
                       )}
                     </div>
                   </button>
@@ -997,7 +1003,6 @@ function Chats({
                     className="chats__send-form"
                     name="message"
                     onSubmit={handleSubmit}
-                    id={currentChat.friendId}
                   >
                     <textarea
                       className="chats__message-input"
