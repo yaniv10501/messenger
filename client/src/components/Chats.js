@@ -393,7 +393,7 @@ function Chats({
           const { friendName, chatId } = data;
           const chatTypingTimer = chatTypingTimers.find((chatTimer) => chatTimer._id === chatId);
           const chatRef = refsArray.find((ref) => ref._id === chatId);
-          if (!chatRef) {
+          if ((!chatRef && !isMobile) || (isMobile && isChatOpen)) {
             if (currentChat._id === chatId) {
               const chatUserTyping = isUserTyping.find((user) => user._id === chatId);
               if (!chatUserTyping) {
@@ -421,7 +421,7 @@ function Chats({
             }, 1500);
             setTypingTimer(timer);
           }
-          if (chatRef) {
+          if ((chatRef && !isMobile) || (isMobile && !isChatOpen)) {
             const {
               ref: { current: lastMessageTarget },
             } = chatRef;
@@ -543,6 +543,8 @@ function Chats({
     isUserTyping,
     chatTypingTimers,
     refsArray,
+    isChatOpen,
+    isMobile,
   ]);
   /** Making dynamic ref objects for chats array and user typing array */
   useEffect(() => {

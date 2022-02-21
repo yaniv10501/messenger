@@ -33,11 +33,10 @@ function Popup({
   //   }
   // }, [mobileQuery, isOpen]);
   return (
-    <button
-      type="button"
+    <div
       onClick={handleClick}
       className={isOpen ? `popup popup_type_${name} popup_opened` : `popup popup_type_${name}`}
-    >{children}</button>
+    >{children}</div>
   );
 }
 
