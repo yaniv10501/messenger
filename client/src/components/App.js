@@ -76,6 +76,7 @@ function App() {
       }
       if (navigationType === 'POP') {
         mainApi.getUserMe(thunkDispatch).then((response) => {
+          console.log(response);
           if (response.email) {
             console.log('initWS');
             setCurrentUser(response);
