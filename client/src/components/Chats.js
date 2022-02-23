@@ -115,6 +115,7 @@ function Chats({
             groupAdmin,
             lastMessage,
             lastMessageTime,
+            unreadCount: 0,
           };
           setAllChatsData([newChatData, ...allChatsData]);
         }
@@ -135,7 +136,16 @@ function Chats({
 
   const handleKey = (event) => handleKeyPress(event, handleSubmit);
 
-  const handleChatClick = (chatId, chatName, chatImage, isMute, isGroup, groupAdmin, friends) => {
+  const handleChatClick = (
+    chatId,
+    chatName,
+    chatImage,
+    isMute,
+    isGroup,
+    groupAdmin,
+    friends,
+    unreadCount
+  ) => {
     console.log(isGroup);
     const { _id } = currentChat;
     if (_id) {
@@ -148,7 +158,14 @@ function Chats({
         console.log(response);
       });
     }
-    mainApi.getMessages(thunkDispatch, chatId).then((result) => {
+    const resetUnreadPromise =
+      unreadCount > 0
+        ? mainApi.resetChatUnread(thunkDispatch, chatId).then((response) => {
+            console.log(response);
+            return true;
+          })
+        : null;
+    const messagesPromise = mainApi.getMessages(thunkDispatch, chatId).then((result) => {
       console.log(result);
       const { loadedAll } = result;
       if (loadedAll) {
@@ -184,6 +201,15 @@ function Chats({
         });
       }
       setIsChatOpen(true);
+    });
+    Promise.all([resetUnreadPromise, messagesPromise]).then((result) => {
+      if (result[0]) {
+        const newChats = allChatsData.map((chat) =>
+          chat._id === chatId ? { ...chat, unreadCount: 0 } : chat
+        );
+        setAllChatsData(newChats);
+      }
+      console.log(result[0], result[1]);
     });
   };
   const handleOpenCompose = () => {
@@ -311,7 +337,7 @@ function Chats({
             chatImage,
             lastMessage,
             lastMessageTime,
-            unreadCount: 1,
+            unreadCount: 0,
           };
           setAllChatsData([newFriendChatData, ...allChatsData]);
           if (_id === chatId) {
@@ -329,10 +355,13 @@ function Chats({
           ...currentChatData,
           lastMessage,
           lastMessageTime,
-          unreadCount: unreadCount + 1,
+          unreadCount: chatId === currentChat._id ? 0 : unreadCount + 1,
         };
         const newAllChatsData = allChatsData.filter((chat) => chat._id !== chatId);
         setAllChatsData([newFriendChatData, ...newAllChatsData]);
+        if (chatId === currentChat._id) {
+          mainApi.resetChatUnread(thunkDispatch, chatId).then((response) => console.log(response));
+        }
       }
       if (currentChat._id === chatId) {
         if (!currentChatMessages) {
@@ -688,11 +717,7 @@ function Chats({
                     </div>
                   </div>
 
-                  <form
-                    className="chats__send-form"
-                    name="message"
-                    onSubmit={handleSubmit}
-                  >
+                  <form className="chats__send-form" name="message" onSubmit={handleSubmit}>
                     <textarea
                       className="chats__message-input"
                       value={messageInput}
@@ -756,7 +781,17 @@ function Chats({
                       key={_id}
                       id={_id}
                       onClick={() =>
-                        handleChatClick(_id, chatName, image, isMute, isGroup, groupAdmin, friends)
+                        handleChatClick(
+                          _id,
+                          chatName,
+                          image,
+                          isMute,
+                          isGroup,
+                          groupAdmin,
+                          friends,
+                          unreadCount,
+                          index
+                        )
                       }
                     >
                       <img
@@ -857,7 +892,16 @@ function Chats({
                       key={_id}
                       id={_id}
                       onClick={() =>
-                        handleChatClick(_id, chatName, image, isMute, isGroup, groupAdmin, friends)
+                        handleChatClick(
+                          _id,
+                          chatName,
+                          image,
+                          isMute,
+                          isGroup,
+                          groupAdmin,
+                          friends,
+                          unreadCount
+                        )
                       }
                     >
                       <img
@@ -939,11 +983,11 @@ function Chats({
                         </p>
                       ) : (
                         <p className="chats__friend-header-bottom-title">
-                        {currentChat.friends[0].isOnline ? 'Online' : currentChat.chatName}
-                        <span className="chats__friend-header-bottom-text">
-                          {currentChat.friends[0].isOnline ? '' : 'Was online'}
-                        </span>
-                      </p>
+                          {currentChat.friends[0].isOnline ? 'Online' : currentChat.chatName}
+                          <span className="chats__friend-header-bottom-text">
+                            {currentChat.friends[0].isOnline ? '' : 'Was online'}
+                          </span>
+                        </p>
                       )}
                     </div>
                   </button>
@@ -999,11 +1043,7 @@ function Chats({
                     </div>
                   </div>
 
-                  <form
-                    className="chats__send-form"
-                    name="message"
-                    onSubmit={handleSubmit}
-                  >
+                  <form className="chats__send-form" name="message" onSubmit={handleSubmit}>
                     <textarea
                       className="chats__message-input"
                       value={messageInput}

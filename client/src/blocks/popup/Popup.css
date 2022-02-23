@@ -49,18 +49,19 @@
 .popup__info-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   margin-top: 20px;
   box-sizing: border-box;
   position: relative;
-  width: 70%;
   background-color: #fff;
   border-radius: 16px;
   box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.15);
-  padding: 14px 12px 28px 12px;
+  padding: 14px 62px 28px 62px;
 }
 
 .popup__info-main {
   display: inline-flex;
+  flex-direction: column;
 }
 
 .popup__info-profile-image {
@@ -153,30 +154,6 @@
   display: flex;
   align-items: center;
   padding: 10px 0 0 0;
-}
-
-.popup__info-text {
-  margin: 0;
-  width: calc(100% - 100px);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.popup__info-time {
-  margin: 0 0 0 10px;
-}
-
-.popup__info-count {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 20px 0 15px;
-  background-color: var(--blueColor);
-  border-radius: 50%;
-  padding: 5px;
-  width: 15px;
-  height: 15px;
 }
 
 .popup__container_type_info {

@@ -632,7 +632,7 @@ class MainApi {
   setGroupImage = (dispatch, chatId, uploadedImage) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/image/${chatId}`,
+      `${this.baseUrl}/group/image/${chatId}`,
       {
         method: 'PATCH',
         body: uploadedImage,
@@ -701,6 +701,32 @@ class MainApi {
       );
       return friendsList;
     });
+
+  setDontDisturbProfile = (dispatch) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/users/me/dontdisturb/profile`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
+
+  resetChatUnread = (dispatch, chatId) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/chats/unread/reset/${chatId}`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
 }
 
 const mainApi = new MainApi(backEndApi);

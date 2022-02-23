@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Popup from './Popup';
 import { fetchReducer, initialState, useThunkReducer } from '../utils/fetch';
 import CurrentUserContext from '../contexts/CurrentUserContext';
@@ -7,6 +7,7 @@ import mainApi from '../utils/MainApi';
 function PopupInfo({ name, popupTitle, isNotifPopupOpen, handleClose, setCurrentUser }) {
   const [state, thunkDispatch] = useThunkReducer(fetchReducer, initialState);
   const { image } = useContext(CurrentUserContext);
+  const [dontdisturbProfile, setDontDisturbProfile] = useState(false);
   const handleNewFile = (event) => {
     const formData = new FormData();
     const image = event.target.files[0];
@@ -14,7 +15,21 @@ function PopupInfo({ name, popupTitle, isNotifPopupOpen, handleClose, setCurrent
     mainApi.setUserImage(thunkDispatch, formData).then((response) => {
       console.log(response);
       setCurrentUser(response);
+      handleClose();
     });
+  };
+  const handleDisturbChange = (event) => {
+    setDontDisturbProfile(event.target.checked);
+  };
+  const handleDone = () => {
+    if (!dontdisturbProfile) {
+      handleClose();
+    } else {
+      mainApi.setDontDisturbProfile(thunkDispatch).then((response) => {
+        console.log(response);
+        handleClose();
+      })
+    }
   };
   return (
     <Popup handleClose={handleClose} isOpen={isNotifPopupOpen} name={name}>
@@ -30,9 +45,10 @@ function PopupInfo({ name, popupTitle, isNotifPopupOpen, handleClose, setCurrent
           />
         </div>
         <div className="popup__info-main">
+          <h2>Upload now!</h2>
           <label
             className="popup__info-profile-image"
-            htmlFor="profile-image"
+            htmlFor="popup-info-profile-image"
             style={
               image
                 ? {
@@ -46,17 +62,20 @@ function PopupInfo({ name, popupTitle, isNotifPopupOpen, handleClose, setCurrent
             <input
               className="popup__info-input-file"
               type="file"
-              id="profile-image"
+              id="popup-info-profile-image"
               onChange={handleNewFile}
-            ></input>
+            />
           </label>
           <div className="popup__info-content-container">
-            <p className="popup__info-friend-name">a</p>
             <div className="popup__info-content">
-              <p className="popup__info-text">b</p>
-              <p className="popup__info-time">x</p>
-              <p className="popup__info-count">z</p>
+              <label>
+                <input type="checkbox" onChange={handleDisturbChange} value={dontdisturbProfile} />
+                Dont remind
+              </label>
             </div>
+            <button type="button" onClick={handleDone}>
+              Maybe later
+            </button>
           </div>
         </div>
       </div>

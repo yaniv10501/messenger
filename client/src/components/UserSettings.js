@@ -99,7 +99,7 @@ function UserSettings({ setCurrentUser }) {
         <div className="settings__user-container">
           <label
             className="settings__profile-image"
-            htmlFor="profile-image"
+            htmlFor="settings-profile-image"
             style={
               image
                 ? {
@@ -113,7 +113,7 @@ function UserSettings({ setCurrentUser }) {
             <input
               className="settings__input-file"
               type="file"
-              id="profile-image"
+              id="settings-profile-image"
               onChange={handleNewFile}
             ></input>
           </label>

@@ -63,6 +63,7 @@ function App() {
       if (navigationType === 'REPLACE' || navigationType === 'POP') {
         mainApi.getUserMe(thunkDispatch).then((response) => {
           if (response.email) {
+            console.log(response);
             const dontDisturb = response.dontDisturb.some((value) => value === 'profile');
             if (!response.image && !dontDisturb) {
               setIsInfoPopupOpen(true);

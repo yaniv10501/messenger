@@ -107,7 +107,7 @@ function NewGroupPopup({
           <p className="popup__new-group-subtitle">Group image</p>
           <label
             className="popup__new-group-image"
-            htmlFor="profile-image"
+            htmlFor="new-group-profile-image"
             style={
               groupImage && {
                 backgroundImage: `url(${groupImage})`,
@@ -119,7 +119,7 @@ function NewGroupPopup({
             <input
               className="popup__new-group-image-input"
               type="file"
-              id="profile-image"
+              id="new-group-profile-image"
               onChange={handleNewGroupImage}
             ></input>
           </label>

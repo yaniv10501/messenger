@@ -12,8 +12,6 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
   const [moreFriends, setMoreFriends] = useState([]);
   const [refsArray, setRefsArray] = useState([]);
   const [groupNameInput, setGroupNameInput] = useState('');
-  const [groupImageInput, setGroupImageInput] = useState(null);
-  const [formData, setFormData] = useState(null);
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const handleMoreFriendsPopupClose = () => {
@@ -31,13 +29,13 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
   const handleGroupNameChange = (event) => {
     setGroupNameInput(event.target.value);
   };
-  const handleNewGroupImage = (event) => {
+  const handleUpdateGroupImage = (event) => {
     const tempData = new FormData();
     const image = event.target.files[0];
-    const imageBlob = URL.createObjectURL(image);
-    setGroupImageInput(imageBlob);
     tempData.append('groupPic', image, image.name);
-    setFormData(tempData);
+    mainApi.setGroupImage(thunkDispatch, currentChat._id, tempData).then((response) => {
+      console.log(response);
+    });
   };
   const addFriendToGroup = (event, _id, friendName) => {
     const { chatName } = currentChat;
@@ -114,7 +112,7 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
           <p className="popup__new-group-subtitle">Group image</p>
           <label
             className="popup__new-group-image"
-            htmlFor="profile-image"
+            htmlFor="group-settings-profile-image"
             style={
               currentChat.chatImage
                 ? {
@@ -128,8 +126,8 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
             <input
               className="popup__new-group-image-input"
               type="file"
-              id="profile-image"
-              onChange={handleNewGroupImage}
+              id="group-settings-profile-image"
+              onChange={handleUpdateGroupImage}
             ></input>
           </label>
           <p className="popup__new-group-subtitle">Group friends</p>
