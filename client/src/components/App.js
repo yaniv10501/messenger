@@ -19,7 +19,7 @@ import initChatWebSocket from '../utils/WebSockets';
 import Loading from './Loading';
 import AddFriends from './AddFriends';
 import UserSettings from './UserSettings';
-import PopupNotification from './PopupNotification';
+import PopupInfo from './PopupInfo';
 import Menu from './Menu';
 import animateMenu from '../utils/animateMenu';
 
@@ -37,12 +37,12 @@ function App() {
   const [isNewGroupPopupOpen, setIsNewGroupPopupOpen] = useState(false);
   const [isGroupSettingsPopupOpen, setIsGroupSettingsPopupOpen] = useState(false);
   const [isChatSettingsPopupOpen, setIsChatSettingsPopupOpen] = useState(false);
-  const [isNotifPopupOpen, setIfNotifPopupOpen] = useState(true);
+  const [isInfoPopupOpen, setIsInfoPopupOpen] = useState(false);
   const [notification, setNotification] = useState({});
   const [notificationsQueue, setNotificationsQueue] = useState([]);
   const closeAllPopups = () => {
     setIsComposePopupOpen(false);
-    setIfNotifPopupOpen(false);
+    setIsInfoPopupOpen(false);
     setIsNewGroupPopupOpen(false);
     setIsChatSettingsPopupOpen(false);
     setIsGroupSettingsPopupOpen(false);
@@ -60,10 +60,13 @@ function App() {
   };
   useEffect(() => {
     if (location.pathname === '/login') {
-      if (navigationType === 'REPLACE') {
+      if (navigationType === 'REPLACE' || navigationType === 'POP') {
         mainApi.getUserMe(thunkDispatch).then((response) => {
           if (response.email) {
-            console.log('initWS');
+            const dontDisturb = response.dontDisturb.some((value) => value === 'profile');
+            if (!response.image && !dontDisturb) {
+              setIsInfoPopupOpen(true);
+            }
             setCurrentUser(response);
             setChatWebSocket(initChatWebSocket());
             setLoggedIn(true);
@@ -71,21 +74,6 @@ function App() {
           } else {
             setPageLoading(false);
             setLoggedIn(false);
-          }
-        });
-      }
-      if (navigationType === 'POP') {
-        mainApi.getUserMe(thunkDispatch).then((response) => {
-          console.log(response);
-          if (response.email) {
-            console.log('initWS');
-            setCurrentUser(response);
-            setChatWebSocket(initChatWebSocket());
-            setLoggedIn(true);
-            navigate('/');
-          } else {
-            setLoggedIn(false);
-            setPageLoading(false);
           }
         });
       }
@@ -251,12 +239,12 @@ function App() {
               }
             />
           </Routes>
-          <PopupNotification
-            name="Notif"
-            popupTitle="Notif"
+          <PopupInfo
+            name="notif"
+            popupTitle="Update your profile"
             notification={notification}
             notificationsQueue={notificationsQueue}
-            isNotifPopupOpen={isNotifPopupOpen}
+            isNotifPopupOpen={isInfoPopupOpen}
             handleClose={closeAllPopups}
           />
         </CurrentUserContext.Provider>
