@@ -1,0 +1,14 @@
+.form-page__user-taken-text {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  width: 200px;
+}
+
+.form-page__user-taken-text_error {
+  color: var(--redColor);
+}
+
+.form-page__user-taken-text_ok {
+  color: var(--greenColor);
+}

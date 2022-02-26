@@ -59,6 +59,9 @@ function App() {
       .catch((error) => console.log(error));
   };
   useEffect(() => {
+    if (location.pathname === '/register') {
+      setPageLoading(false);
+    }
     if (location.pathname === '/login') {
       if (navigationType === 'REPLACE' || navigationType === 'POP') {
         mainApi.getUserMe(thunkDispatch).then((response) => {

@@ -16,6 +16,7 @@ const useFormValidation = () => {
     let costumIsValid;
     let costumValue;
     const { name, value } = event.target;
+    console.log(name);
     if (name === 'password') {
       const passwordInput = event.target;
       const passwordValue = passwordInput.value;
@@ -37,6 +38,23 @@ const useFormValidation = () => {
         }
       } else {
         passwordInput.customMessage = '';
+      }
+    }
+    if (name === 'userName') {
+      const userInput = event.target;
+      const userValue = userInput.value;
+      if (userValue.length <= 30 && userValue.length > 4) {
+        const isInputValid = testValid(userValue);
+        if (isInputValid) {
+          userInput.customMessage = '';
+          costumIsValid = true;
+        } else {
+          userInput.customMessage = 'User name is invalid';
+          costumIsValid = false;
+        }
+      } else {
+        userInput.customMessage = '';
+        costumIsValid = true;
       }
     }
     if (name === 'firstName' || name === 'lastName') {
@@ -79,7 +97,7 @@ const useFormValidation = () => {
             costumValue = {
               ...currentBirthdayValue,
               day: null,
-            }
+            };
             break;
 
           case 'month':
@@ -87,7 +105,7 @@ const useFormValidation = () => {
             costumValue = {
               ...currentBirthdayValue,
               month: null,
-            }
+            };
             break;
 
           case 'year':
@@ -95,7 +113,7 @@ const useFormValidation = () => {
             costumValue = {
               ...currentBirthdayValue,
               year: null,
-            }
+            };
             break;
           default:
             break;
@@ -109,7 +127,7 @@ const useFormValidation = () => {
             costumValue = {
               ...currentBirthdayValue,
               day: birthdayValue,
-            }
+            };
             break;
 
           case 'month':
@@ -117,7 +135,7 @@ const useFormValidation = () => {
             costumValue = {
               ...currentBirthdayValue,
               month: birthdayValue,
-            }
+            };
             break;
 
           case 'year':
@@ -125,7 +143,7 @@ const useFormValidation = () => {
             costumValue = {
               ...currentBirthdayValue,
               year: birthdayValue,
-            }
+            };
             break;
           default:
             break;

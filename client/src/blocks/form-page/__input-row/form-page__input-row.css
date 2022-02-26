@@ -2,3 +2,7 @@
   display: flex;
   width: 100%;
 }
+
+.form-page__input-row_user {
+  align-items: center;
+}

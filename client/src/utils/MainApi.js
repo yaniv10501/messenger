@@ -6,26 +6,22 @@ class MainApi {
     this.baseUrl = baseUrl;
   }
 
-  signUp = (dispatch, firstName, lastName, gender, birthday, email, password) =>
-    useFetch(
-      dispatch,
-      `${this.baseUrl}/signup`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          gender,
-          birthday,
-          email,
-          password,
-        }),
+  signUp = (dispatch, userName, firstName, lastName, gender, birthday, email, password) =>
+    useFetch(dispatch, `${this.baseUrl}/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      { silent: true }
-    ).then((response) => response);
+      body: JSON.stringify({
+        userName,
+        firstName,
+        lastName,
+        gender,
+        birthday,
+        email,
+        password,
+      }),
+    }).then((response) => response);
 
   signIn = (dispatch, email, password) =>
     useFetch(
@@ -721,6 +717,25 @@ class MainApi {
       `${this.baseUrl}/chats/unread/reset/${chatId}`,
       {
         method: 'POST',
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
+
+  checkUserTaken = (dispatch, userName) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/users/name/check`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userName,
+        }),
         credentials: 'include',
       },
       {

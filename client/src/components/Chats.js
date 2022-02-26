@@ -201,14 +201,20 @@ function Chats({
         });
       }
       setIsChatOpen(true);
+      console.log(result);
+      return result.isOnline;
     });
     Promise.all([resetUnreadPromise, messagesPromise]).then((result) => {
-      if (result[0]) {
-        const newChats = allChatsData.map((chat) =>
-          chat._id === chatId ? { ...chat, unreadCount: 0 } : chat
-        );
-        setAllChatsData(newChats);
-      }
+      const newChats = allChatsData.map((chat) => {
+        if (chat._id === chatId) {
+          if (result[0]) {
+            return { ...chat, unreadCount: 0, isOnline: result[1] };
+          }
+          return { ...chat, isOnline: result[1] };
+        }
+        return chat;
+      });
+      setAllChatsData(newChats);
       console.log(result[0], result[1]);
     });
   };
@@ -983,9 +989,11 @@ function Chats({
                         </p>
                       ) : (
                         <p className="chats__friend-header-bottom-title">
-                          {currentChat.friends[0].isOnline ? 'Online' : currentChat.chatName}
+                          {currentChat.isOnline.online ? 'Online' : ''}
                           <span className="chats__friend-header-bottom-text">
-                            {currentChat.friends[0].isOnline ? '' : 'Was online'}
+                            {currentChat.isOnline.online
+                              ? ''
+                              : `Was online ${currentChat.isOnline.time}`}
                           </span>
                         </p>
                       )}

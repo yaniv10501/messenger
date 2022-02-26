@@ -5,6 +5,7 @@
   --greyColor: #d4d8d4;
   --platinumColor: #e6e8e6;
   --redColor: #f50010;
+  --greenColor: #2a9134;
 }
 
 @import url('./vendor/normalize.css');
@@ -49,6 +50,8 @@
 @import url('./blocks/form-page/__input-container/form-page__input-container.css');
 @import url('./blocks/form-page/__input-container/_register/form-page__input-container_register.css');
 @import url('./blocks/form-page/__input-container/_password/form-page__input-container_password.css');
+@import url('./blocks//form-page/__user-taken/form-page__user-taken.css');
+@import url('./blocks/form-page/__user-taken-text/form-page__user-taken-text.css');
 @import url('./blocks/form-page/__input-title/form-page__input-title.css');
 @import url('./blocks/form-page/__input/form-page__input.css');
 @import url('./blocks/form-page/__input/_email/form-page__input_email.css');

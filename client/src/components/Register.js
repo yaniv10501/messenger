@@ -5,16 +5,34 @@ import { useNavigate } from 'react-router-dom';
 import mainApi from '../utils/MainApi';
 import { fetchReducer, initialState, useThunkReducer } from '../utils/fetch';
 import Loading from './Loading';
+import Preloader from './Preloader/Preloader';
+import { testValid } from '../utils/regex';
 
 function Register() {
   const navigate = useNavigate();
   const [state, thunkDispatch] = useThunkReducer(fetchReducer, initialState);
-  const { silentLoading } = state;
+  const { loading, silentLoading } = state;
+  const [isUserTakenLoading, setIsUserTakenLoading] = useState(false);
+  const [isUserTaken, setIsUserTaken] = useState(false);
+  const [isEmailTakenLoading, setIsEmailTakenLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [userNameTyping, setUserNameTyping] = useState({
+    isTyping: false,
+    timer: null,
+  });
   const { values, handleChange, errors, isValid, resetForm, setValues, setIsValid } =
     useFormValidation();
-  const { firstName = '', lastName = '', gender, birthday, email = '', password = '' } = values;
   const {
+    userName = '',
+    firstName = '',
+    lastName = '',
+    gender,
+    birthday,
+    email = '',
+    password = '',
+  } = values;
+  const {
+    userName: userNameError,
     firstName: firstNameError,
     lastName: lastNameError,
     gender: genderError,
@@ -29,6 +47,7 @@ function Register() {
       mainApi
         .signUp(
           thunkDispatch,
+          userName,
           firstName,
           lastName,
           gender,
@@ -55,11 +74,58 @@ function Register() {
     if (!passwordVisible) passwordShowButton.type = 'text';
     else passwordShowButton.type = 'password';
   };
+  const checkUserTaken = (userNameValue) => {
+    console.log(userNameValue);
+    mainApi.checkUserTaken(thunkDispatch, userNameValue).then((response) => {
+      console.log(response);
+      const { isTaken } = response;
+      setIsUserTakenLoading(false);
+      if (isTaken) {
+        setIsUserTaken(true);
+      } else {
+        setIsUserTaken(false);
+      }
+    });
+  };
+  const handleUserNameChange = (event) => {
+    const userNameValue = event.target.value;
+    if (userNameValue.length > 3 && testValid(userNameValue)) {
+      if (!isUserTakenLoading) {
+        setIsUserTakenLoading(true);
+      }
+      if (userNameTyping.isTyping) {
+        clearTimeout(userNameTyping.timer);
+        setUserNameTyping({
+          isTyping: true,
+          timer: setTimeout(() => {
+            setUserNameTyping({
+              isTyping: false,
+              timer: null,
+            });
+            checkUserTaken(userNameValue);
+          }, 1500),
+        });
+      } else {
+        setUserNameTyping({
+          isTyping: true,
+          timer: setTimeout(() => {
+            setUserNameTyping({
+              isTyping: false,
+              timer: null,
+            });
+            checkUserTaken(userNameValue);
+          }, 1500),
+        });
+      }
+    }
+
+    handleChange(event);
+  };
   const handleLoginNavigate = () => navigate('/login');
   return (
     <>
-      <Loading isLoading={silentLoading} />
-      <main className={silentLoading ? 'form-page form-page_hidden' : "form-page"}>
+      <Loading isLoading={loading} />
+      <main className={loading ? 'form-page form-page_hidden' : 'form-page'}>
         <h1 className="form-page__title">Welcome to the Messenger website</h1>
 
         <p className="form-page__subtitle">Please fill in your details</p>
@@ -71,6 +137,39 @@ function Register() {
             onSubmit={handleSubmit}
             noValidate
           >
+            <div className="form-page__input-row form-page__input-row_user">
+              <div className="form-page__input-container form-page__input-container_user">
+                <input
+                  className="form-page__input"
+                  type="text"
+                  name="userName"
+                  value={userName}
+                  placeholder={'User name'}
+                  minLength={4}
+                  maxLength={30}
+                  onChange={handleUserNameChange}
+                  required
+                />
+
+                <span id="userName-error" className="form-page__error-input">
+                  {userNameError}
+                </span>
+              </div>
+              <div className="form-page__user-taken">
+                {isUserTakenLoading ? (
+                  <Preloader isLoading={isUserTakenLoading} />
+                ) : isUserTaken ? (
+                  <p className="form-page__user-taken-text form-page__user-taken-text_error">
+                    This user name is taken
+                  </p>
+                ) : (
+                  <p className="form-page__user-taken-text form-page__user-taken-text_ok">
+                    {(userName.length > 3 && testValid(userName)) && 'This user name is available'}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="form-page__input-row">
               <div className="form-page__input-container form-page__input-container_register">
                 <input
