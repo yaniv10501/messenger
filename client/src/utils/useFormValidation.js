@@ -16,7 +16,6 @@ const useFormValidation = () => {
     let costumIsValid;
     let costumValue;
     const { name, value } = event.target;
-    console.log(name);
     if (name === 'password') {
       const passwordInput = event.target;
       const passwordValue = passwordInput.value;
@@ -90,8 +89,9 @@ const useFormValidation = () => {
       const birthdayInput = event.target;
       const birthdayValue = birthdayInput.value;
       const currentBirthdayValue = values.birthday;
+      const birthdayAriaLabel = birthdayInput.ariaLabel || birthdayInput.getAttribute('aria-label');
       if (birthdayValue === 'disabled') {
-        switch (birthdayInput.ariaLabel) {
+        switch (birthdayAriaLabel) {
           case 'day':
             birthdayValid.day = false;
             costumValue = {
@@ -121,7 +121,7 @@ const useFormValidation = () => {
         birthdayInput.customMessage = 'Enter your birthday';
         costumIsValid = false;
       } else {
-        switch (birthdayInput.ariaLabel) {
+        switch (birthdayAriaLabel) {
           case 'day':
             birthdayValid.day = true;
             costumValue = {
@@ -155,7 +155,8 @@ const useFormValidation = () => {
     }
     if (name === 'gender') {
       costumIsValid = true;
-      costumValue = event.target.ariaLabel;
+      costumValue = event.target.ariaLabel || event.target.getAttribute('aria-label');
+      console.log(costumValue);
     }
     setValues({ ...values, [name]: costumValue || value });
     setErrors({ ...errors, [name]: event.target.customMessage || event.target.validationMessage });

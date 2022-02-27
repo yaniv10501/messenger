@@ -44,6 +44,7 @@ function Register() {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (isValid) {
+      console.log(values);
       mainApi
         .signUp(
           thunkDispatch,
@@ -164,7 +165,7 @@ function Register() {
                   </p>
                 ) : (
                   <p className="form-page__user-taken-text form-page__user-taken-text_ok">
-                    {(userName.length > 3 && testValid(userName)) && 'This user name is available'}
+                    {userName.length > 3 && testValid(userName) && 'This user name is available'}
                   </p>
                 )}
               </div>

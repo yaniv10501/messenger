@@ -33,6 +33,7 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
   const [chatWebSocket, setChatWebSocket] = useState({});
+  const [currentChat, setCurrentChat] = useState({});
   const [isComposePopupOpen, setIsComposePopupOpen] = useState(false);
   const [isNewGroupPopupOpen, setIsNewGroupPopupOpen] = useState(false);
   const [isGroupSettingsPopupOpen, setIsGroupSettingsPopupOpen] = useState(false);
@@ -46,6 +47,11 @@ function App() {
     setIsNewGroupPopupOpen(false);
     setIsChatSettingsPopupOpen(false);
     setIsGroupSettingsPopupOpen(false);
+  };
+  const openChat = (chatId) => {
+    setCurrentChat({
+      _id: chatId,
+    });
   };
   const handleLogout = () => {
     mainApi
@@ -179,6 +185,7 @@ function App() {
         <CurrentUserContext.Provider value={currentUser}>
           <Menu
             loggedIn={loggedIn}
+            openChat={openChat}
             menuRef={menuRef}
             notification={notification}
             setNotification={setNotification}
@@ -213,6 +220,8 @@ function App() {
                 <ProtectedRoute loggedIn={loggedIn}>
                   <Chats
                     chatWebSocket={chatWebSocket}
+                    currentChat={currentChat}
+                    setCurrentChat={setCurrentChat}
                     isComposePopupOpen={isComposePopupOpen}
                     setIsComposePopupOpen={setIsComposePopupOpen}
                     isNewGroupPopupOpen={isNewGroupPopupOpen}

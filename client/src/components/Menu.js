@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 function Menu({
   loggedIn,
+  openChat,
   menuRef,
   notification,
   setNotification,
@@ -45,6 +46,7 @@ function Menu({
       switch (notification.type) {
         case 'New message':
           navigate('/chats');
+          openChat(notification.chatId);
           break;
         case 'Friend request':
           navigate('/addfriends');

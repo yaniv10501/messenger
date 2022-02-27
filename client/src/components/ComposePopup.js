@@ -14,7 +14,7 @@ function ComposePopup({ isPopupOpen, handleClose, composeList, initNewChat }) {
     >
       <div className="popup__compose-user-cards">
         {composeList && composeList.length > 0 ? (
-          composeList.map(({ _id, chatName, chatImage, friends }) => (
+          composeList.map(({ _id, chatName, chatImage, friends, isOnline }) => (
             <div className="popup__compose-user-card" key={_id}>
               <img
                 className="popup__compose-user-image"
@@ -24,7 +24,7 @@ function ComposePopup({ isPopupOpen, handleClose, composeList, initNewChat }) {
               <h2 className="popup__compose-user-name">{chatName}</h2>
               <button
                 className="popup__compose-send-button"
-                onClick={() => initNewChat(_id, chatName, chatImage, friends)}
+                onClick={() => initNewChat(_id, chatName, chatImage, friends, isOnline)}
               >
                 <p className="popup__compose-send-button-text">Send a message</p>
               </button>
