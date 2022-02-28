@@ -742,6 +742,61 @@ class MainApi {
         silent: true,
       }
     ).then((response) => response);
+
+  getNotifications = (dispatch) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/notifications`,
+      {
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
+
+  setNewNotification = (dispatch, newNotif) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/notifications/new`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newNotif),
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
+
+  setNotificationSeen = (dispatch, notifId) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/notifications/seen/${notifId}`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
+
+  deleteNotification = (dispatch, notifId) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/notifications/delete/${notifId}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
 }
 
 const mainApi = new MainApi(backEndApi);
