@@ -183,6 +183,9 @@ function App() {
       };
     }
   }, [location, chatWebSocket, notificationsQueue]);
+  useEffect(() => {
+    mainApi.getNotifications(thunkDispatch).then((notifList) => setNotificationsQueue(notifList));
+  }, []);
   return (
     <>
       <Loading isLoading={pageLoading} />
