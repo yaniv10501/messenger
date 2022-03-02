@@ -71,13 +71,18 @@ function App() {
     if (location.pathname === '/login') {
       if (navigationType === 'REPLACE' || navigationType === 'POP') {
         mainApi.getUserMe(thunkDispatch).then((response) => {
-          if (response.email) {
-            console.log(response);
-            const dontDisturb = response.dontDisturb.some((value) => value === 'profile');
-            if (!response.image && !dontDisturb) {
+          if (response.user) {
+            const { user, notifications } = response;
+            const dontDisturb = user.dontDisturb.some((value) => value === 'profile');
+            if (!user.image && !dontDisturb) {
               setIsInfoPopupOpen(true);
             }
-            setCurrentUser(response);
+            setCurrentUser(user);
+            if (notifications.length > 0) {
+              setNotification(notifications[0]);
+              setNotificationsQueue(notifications);
+              console.log(notifications);
+            }
             setChatWebSocket(initChatWebSocket());
             setLoggedIn(true);
             navigate('/');
