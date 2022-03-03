@@ -57,7 +57,7 @@ When a user send enter a chat the unread count is set to 0, when a user receive 
 
 ### Dynamic content loading
 
-Friends lists (More, Pending and Requests), chats list and chat messages list are being loaded to the website so maintain performance.
+Friends lists (More, Pending and Requests), chats list and chat messages list are being loaded from the BLL to the website so maintain performance.
 
 You can read more about the BLL (Users States) feature in the [Back-End repo](https://github.com/yaniv10501/messenger-api)
 
