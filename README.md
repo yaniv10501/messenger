@@ -30,11 +30,11 @@ Friend requests and approves are being transferred with a web-socket message to 
 Every friend request need to be approved by the other user,
 after the request is approved both users can start a chat or add each other to groups.
 
-### Adding profile image, notify users without porfile image and don't disturb deature
+### Adding profile image, notify users without profile image and don't disturb feature
 
 Every user can add a profile image so other users can see.
 Images can be jpeg, jpg or png type, and every image is being saved in the server.
-Users without a profile image visitng the main page will get a popup promoting them to upload an image profile,
+Users without a profile image visiting the main page will get a popup promoting them to upload an image profile,
 The user can upload a new image directly form the popup, close it and get notified next time he visit main page, or check the "Don't remind" checkbox to not get notified again.
 
 ### Creating groups
@@ -42,16 +42,16 @@ The user can upload a new image directly form the popup, close it and get notifi
 Every user can create a groups with the "New group" button in the chats page.
 Groups have a name, image and friends list, and the Group popup is being validated to make sure a group have a name and at least one friend, group image is not mandatory.
 In group chat, every message (excluding the logged user messages) is being marked with the name of the user who sent it.
-You can also see wich user is typing at a giving moment.
+You can also see witch user is typing at a giving moment.
 
 ### Sending messages and unread messages count
 
-Messages are being transferred with a websocket message to the other user/s (if he/they is/are connected to his/their socket).
-When a user send enter a chat the unread count is set to 0, when a user recive a message if he is not currently in the chat the unread count will increase by 1, else it will remain 0.
+Messages are being transferred with a web-socket message to the other user/s (if he/they is/are connected to his/their socket).
+When a user send enter a chat the unread count is set to 0, when a user receive a message if he is not currently in the chat the unread count will increase by 1, else it will remain 0.
 
 ### Dynamic content loading
 
-Friends lists (More, Pending and Requests), chats list and chat messages list are being dynamicly loaded to the website so maintain performance.
+Friends lists (More, Pending and Requests), chats list and chat messages list are being loaded to the website so maintain performance.
 You can read more about the BBL (Users States) feature in the [Back-End repo](https://github.com/yaniv10501/messenger-api)
 There is a scroll event on the containers and a loaded all boolean state for each dynamic list.
 while the loaded all state is false if the preloader is in view a request is made to the API and more items are being loaded to the list.
@@ -87,4 +87,4 @@ If the user is in the chats page he wont get New messages notifications, if the 
 
 ## Contribute
 
-This is an open source project, every contribution or feedback will be appriciated !
+This is an open source project, every contribution or feedback will be appreciated !
