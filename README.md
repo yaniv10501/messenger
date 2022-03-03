@@ -100,6 +100,7 @@ If the user is in the chats page he wont get New messages notifications, if the 
 * Modify group friends (Add/Delete)
 * Group admin features
 * Profile page for user
+* End to end messages encryption
 
 ## Contribute
 
