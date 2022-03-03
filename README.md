@@ -59,7 +59,7 @@ When a user send enter a chat the unread count is set to 0, when a user receive 
 
 Friends lists (More, Pending and Requests), chats list and chat messages list are being loaded to the website so maintain performance.
 
-You can read more about the BBL (Users States) feature in the [Back-End repo](https://github.com/yaniv10501/messenger-api)
+You can read more about the BLL (Users States) feature in the [Back-End repo](https://github.com/yaniv10501/messenger-api)
 
 There is a scroll event on the containers and a loaded all boolean state for each dynamic list.
 while the loaded all state is false if the preloader is in view a request is made to the API and more items are being loaded to the list.
