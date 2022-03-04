@@ -432,6 +432,9 @@ function Chats({
             clearInterval(interval);
             setChatTypingTimers(newChatTimers);
           }
+          if (chatId === currentChat._id) {
+            chatWebSocket.send({ message: 'Hey' });
+          }
           updateMessages(data);
         }
         /** User typing socket message */
