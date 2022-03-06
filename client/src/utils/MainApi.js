@@ -797,6 +797,31 @@ class MainApi {
         silent: true,
       }
     ).then((response) => response);
+
+  deleteNotificationType = (dispatch, notifType) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/notifications/delete/type/${notifType}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
+
+  findOtherUsers = (dispatch, userQuery) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/users/find?userQuery=${userQuery}`,
+      {
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
 }
 
 const mainApi = new MainApi(backEndApi);

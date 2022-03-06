@@ -1,8 +1,10 @@
 .chats__chat-row {
+  width: 0;
+  min-width: 200px;
   cursor: pointer;
   border-bottom: .1px solid rgba(255, 254, 255, 0.4);
   margin: 20px 10px 0;
   flex-grow: 1;
-  display: flex;
+  display: inline-flex;
   justify-content: space-between;
 }

@@ -6,7 +6,7 @@ import addButton from '../images/add-button.svg';
 import FriendCard from './FriendCard';
 import Preloader from './Preloader/Preloader';
 
-function AddFriends({ chatWebSocket }) {
+function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
   const navigate = useNavigate();
   const friendsRef = useRef();
   const requestsRef = useRef();
@@ -19,6 +19,7 @@ function AddFriends({ chatWebSocket }) {
   const [addFriendsList, setAddFriendsList] = useState([]);
   const [friendRequestsList, setFriendRequestsList] = useState([]);
   const [pendingFriendRequestsList, setPendingFriendRequestsList] = useState([]);
+  const [userQuery, setUserQuery] = useState('');
   const handleBack = () => navigate('/');
   const handleAddFriend = (friendId, index, image) =>
     mainApi.addFriend(thunkDispatch, friendId, index).then((response) => {
@@ -33,10 +34,13 @@ function AddFriends({ chatWebSocket }) {
             }
           )
           .then((data) => {
-            setFriendRequestsList([{
-              ...response,
-              image: data.image,
-            }, ...pendingFriendRequestsList]);
+            setFriendRequestsList([
+              {
+                ...response,
+                image: data.image,
+              },
+              ...pendingFriendRequestsList,
+            ]);
           });
       }
       if (image && image !== 'Uploaded') {
@@ -121,7 +125,20 @@ function AddFriends({ chatWebSocket }) {
       }
     }
   };
+  const handleSearchChange = (event) => {
+    setUserQuery(event.target.value);
+  };
+  const handleUserSearch = () => {
+    console.log(userQuery);
+    mainApi
+      .findOtherUsers(thunkDispatch, userQuery)
+      .then((response) => setAddFriendsList(response));
+  };
   useEffect(() => {
+    mainApi.deleteNotificationType(thunkDispatch, 'friend').then((notifications) => {
+      setNotificationsQueue(notifications);
+      setNotification(notifications[0] || {});
+    });
     mainApi.getAddFriends(thunkDispatch).then((response) => {
       console.log(response);
       const { moreFriends, friendRequests, pendingFriendRequests } = response;
@@ -183,6 +200,10 @@ function AddFriends({ chatWebSocket }) {
             className="add-friends__more-friends-container no-scroll-bar"
             onScroll={handleFriendsScroll}
           >
+            <input type="text" onChange={handleSearchChange}></input>
+            <button type="button" onClick={handleUserSearch}>
+              Search
+            </button>
             {addFriendsList &&
               addFriendsList.length > 0 &&
               addFriendsList.map(({ _id, firstName, lastName, image }, index) => (

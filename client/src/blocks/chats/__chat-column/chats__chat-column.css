@@ -1,5 +1,5 @@
 .chats__chat-column {
-  width: 190px;
+  min-width: 170px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
