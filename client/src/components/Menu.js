@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import notifIcon from '../images/notifications.svg';
 import menuIcon from '../images/menu.png';
 import arrow from '../images/arrow.svg';
 import noProfile from '../images/no-profile.svg';
 import { useNavigate } from 'react-router-dom';
+import { fetchReducer, initialState, useThunkReducer } from '../utils/fetch';
+import mainApi from '../utils/MainApi';
 
 function Menu({
   loggedIn,
@@ -15,8 +17,10 @@ function Menu({
   setNotificationsQueue,
 }) {
   const navigate = useNavigate();
+  const [state, thunkDispatch] = useThunkReducer(fetchReducer, initialState);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [notificationIndex, setNotificationIndex] = useState(0);
+  const [unSeenCount, setUnSeenCount] = useState(0);
   const toggleMenuOpen = () => {
     const { current } = menuRef;
     if (isMenuOpen) {
@@ -43,22 +47,43 @@ function Menu({
   const handleNotificationAction = () => {
     if (notification.type) {
       toggleMenuOpen();
-      switch (notification.type) {
-        case 'New message':
-          navigate('/chats');
-          openChat(notification.chatId);
-          break;
-        case 'Friend request':
-          navigate('/addfriends');
-          break;
-        case 'Friend accept':
-          navigate('/chats');
-          break;
-        default:
-          break;
-      }
+      mainApi.deleteNotification(thunkDispatch, notification._id).then(() => {
+        const newNotifications = notificationsQueue.filter(
+          (notif) => notif._id !== notification._id
+        );
+        setNotificationsQueue(newNotifications);
+        setNotification(newNotifications[0] || {});
+        switch (notification.type) {
+          case 'New message':
+            openChat(notification.chatId);
+            navigate('/chats');
+            break;
+          case 'Friend request':
+            navigate('/addfriends');
+            break;
+          case 'Friend accept':
+            navigate('/chats');
+            break;
+          default:
+            break;
+        }
+      });
     }
   };
+  useEffect(() => {
+    if (isMenuOpen) {
+      if (!notification.isSeen) {
+        mainApi.setNotificationSeen(thunkDispatch, notification._id).then(() => {
+          setUnSeenCount(unSeenCount - 1);
+        });
+      }
+    }
+  }, [isMenuOpen, notification]);
+  useEffect(() => {
+    if (Array.isArray(notificationsQueue) && notificationsQueue.length > 0) {
+      setUnSeenCount(notificationsQueue.filter(({ isSeen }) => !isSeen).length);
+    }
+  }, [notificationsQueue]);
   return (
     <>
       {loggedIn && (
@@ -69,9 +94,7 @@ function Menu({
             onClick={handleNotificationAction}
           >
             <img className="menu__notif-icon" src={notifIcon} alt="notif" />
-            {notificationsQueue && notificationsQueue.length > 0 && (
-              <p className="menu__notif-count">{notificationsQueue.length}</p>
-            )}
+            {unSeenCount > 0 && <p className="menu__notif-count">{unSeenCount}</p>}
           </button>
           {notification.user ? (
             <div className="menu__notif-continer">
@@ -128,9 +151,7 @@ function Menu({
           )}
           <button className="menu__button" type="button" onClick={toggleMenuOpen}>
             <img className="menu__icon" src={menuIcon} alt="notif" />
-            {notificationsQueue && notificationsQueue.length > 0 && (
-              <p className="menu__button-count">{notificationsQueue.length}</p>
-            )}
+            {unSeenCount > 0 && <p className="menu__button-count">{unSeenCount}</p>}
           </button>
         </div>
       )}

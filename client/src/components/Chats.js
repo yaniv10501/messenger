@@ -24,6 +24,8 @@ function Chats({
   isGroupSettingsPopupOpen,
   setIsGroupSettingsPopupOpen,
   closeAllPopups,
+  setNotification,
+  setNotificationsQueue,
 }) {
   const isMobile = useMediaQuery({
     query: '(max-width: 945px)',
@@ -113,6 +115,7 @@ function Chats({
             isGroup,
             groupAdmin,
             lastMessage,
+            lastMessageByUser: true,
             lastMessageTime,
             unreadCount: 0,
           };
@@ -123,10 +126,18 @@ function Chats({
           const newFriendChatData = {
             ...currentChatData,
             lastMessage,
+            lastMessageByUser: true,
             lastMessageTime,
             unreadCount: 0,
           };
           const newAllChatsData = allChatsData.filter((chat) => chat._id !== chatId);
+          const chatRef = refsArray.find((ref) => ref._id === chatId);
+          if (chatRef) {
+            const {
+              ref: { current: lastMessageTarget },
+            } = chatRef;
+            lastMessageTarget.textContent = `You: ${lastMessage}`;
+          }
           setAllChatsData([newFriendChatData, ...newAllChatsData]);
         }
         setMessageInput('');
@@ -209,7 +220,7 @@ function Chats({
           if (result[0]) {
             return { ...chat, unreadCount: 0, isOnline: result[1] };
           }
-          return { ...chat, isOnline: result[1] };
+          return { ...chat, isOnline: result[1] || chat.isOnline };
         }
         return chat;
       });
@@ -332,6 +343,7 @@ function Chats({
             const newFriendChatData = {
               ...chat,
               lastMessage,
+              lastMessageByUser: false,
               lastMessageTime,
               unreadCount: 1,
             };
@@ -349,6 +361,7 @@ function Chats({
               time: null,
             },
             lastMessage,
+            lastMessageByUser: false,
             lastMessageTime,
             unreadCount: 0,
           };
@@ -371,10 +384,18 @@ function Chats({
         const newFriendChatData = {
           ...currentChatData,
           lastMessage,
+          lastMessageByUser: false,
           lastMessageTime,
           unreadCount: chatId === currentChat._id ? 0 : unreadCount + 1,
         };
         const newAllChatsData = allChatsData.filter((chat) => chat._id !== chatId);
+        const chatRef = refsArray.find((ref) => ref._id === chatId);
+        if (chatRef) {
+          const {
+            ref: { current: lastMessageTarget },
+          } = chatRef;
+          lastMessageTarget.textContent = lastMessage;
+        }
         setAllChatsData([newFriendChatData, ...newAllChatsData]);
         if (chatId === currentChat._id) {
           mainApi.resetChatUnread(thunkDispatch, chatId).then((response) => console.log(response));
@@ -416,7 +437,7 @@ function Chats({
       chatWebSocket.onmessage = (wsMessage) => {
         const { message, data } = JSON.parse(wsMessage.data);
         if (message === 'New message') {
-          const { chatId, message } = data;
+          const { chatId, message, notifId } = data;
           const chatTypingTimer = chatTypingTimers.find((chatTimer) => chatTimer._id === chatId);
           if (chatTypingTimer) {
             const { timer, interval } = chatTypingTimer;
@@ -432,6 +453,7 @@ function Chats({
             clearInterval(interval);
             setChatTypingTimers(newChatTimers);
           }
+          chatWebSocket.send(JSON.stringify({ message: 'New message', chats: true, notifId }));
           updateMessages(data);
         }
         /** User typing socket message */
@@ -526,8 +548,16 @@ function Chats({
                 }
               }, 400);
               const chatTimer = setTimeout(() => {
-                const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
+                const { lastMessage, lastMessageByUser } = allChatsData.find(
+                  (chat) => chat._id === chatId
+                );
                 lastMessageTarget.textContent = lastMessage;
+                console.log(lastMessageByUser, lastMessageTarget);
+                if (lastMessageByUser) {
+                  const newSpan = document.createElement('span');
+                  newSpan.textContent = 'You:';
+                  lastMessageTarget.prepend(newSpan);
+                }
                 const newChatTimers = chatTypingTimers.filter(
                   (chatTimer) => chatTimer._id !== chatId
                 );
@@ -548,11 +578,16 @@ function Chats({
               const { timer, interval } = chatTypingTimer;
               clearTimeout(timer);
               const chatTimer = setTimeout(() => {
-                const { lastMessage } = allChatsData.find((chat) => chat._id === chatId);
+                const { lastMessage, lastMessageByUser } = allChatsData.find((chat) => chat._id === chatId);
                 lastMessageTarget.textContent = lastMessage;
                 const newChatTimers = chatTypingTimers.filter(
                   (chatTimer) => chatTimer._id !== chatId
                 );
+                if (lastMessageByUser) {
+                  const newSpan = document.createElement('span');
+                  newSpan.textContent = 'You:';
+                  lastMessageTarget.prepend(newSpan);
+                }
                 setChatTypingTimers(newChatTimers);
                 clearInterval(interval);
               }, 1500);
@@ -677,60 +712,78 @@ function Chats({
   }, [allChatsData]);
   /** Loading init data */
   useEffect(() => {
-    mainApi.getChats(thunkDispatch).then((response) => {
-      console.log(response);
-      const { loadedAll, data } = response;
-      setAllChatsData(data);
-      setLoadedAllChats(loadedAll);
-      if (currentChat._id) {
-        const {
-          _id: chatId,
-          isGroup,
-          friends,
-          groupAdmin,
-          chatName,
-          chatImage,
-          isMute,
-        } = data.find((chat) => chat._id === currentChat._id);
-        mainApi.getMessages(thunkDispatch, chatId).then((result) => {
-          console.log(result);
-          const { loadedAll } = result;
-          if (loadedAll) {
-            setLoadedAllMessages(true);
-          }
-          if (!loadedAll) {
-            setLoadedAllMessages(false);
-          }
-          if (isGroup) {
-            let subtitle = '';
-            friends.forEach((friend) => {
-              subtitle = subtitle.concat(`${friend.firstName} ${friend.lastName}, `);
-            });
-            setCurrentChat({
-              ...result,
-              friends,
-              isGroup,
-              groupAdmin,
-              subtitle,
-              chatName,
-              chatImage,
-              isMute,
-            });
-          }
-          if (!isGroup) {
-            setCurrentChat({
-              ...result,
-              friends,
-              isGroup,
-              chatName,
-              chatImage,
-              isMute,
-            });
-          }
-          setIsChatOpen(true);
-        });
-      }
-    });
+    Promise.all([
+      mainApi.deleteNotificationType(thunkDispatch, 'chat').then((notifications) => {
+        console.log(notifications);
+        setNotificationsQueue(notifications);
+        setNotification(notifications[0] || {});
+      }),
+      mainApi.getChats(thunkDispatch).then((response) => {
+        console.log(response);
+        const { loadedAll, data } = response;
+        setLoadedAllChats(loadedAll);
+        if (currentChat._id) {
+          let chatToOpen;
+          const newData = data.map((chat) => {
+            if (chat._id === currentChat._id) {
+              chatToOpen = chat;
+              chatToOpen.unreadCount = 0;
+              return chatToOpen;
+            }
+            return chat;
+          });
+          const {
+            _id: chatId,
+            isGroup,
+            friends,
+            groupAdmin,
+            chatName,
+            chatImage,
+            isMute,
+          } = chatToOpen;
+          setAllChatsData(newData);
+          mainApi.getMessages(thunkDispatch, chatId).then((result) => {
+            console.log(result);
+            const { loadedAll } = result;
+            if (loadedAll) {
+              setLoadedAllMessages(true);
+            }
+            if (!loadedAll) {
+              setLoadedAllMessages(false);
+            }
+            if (isGroup) {
+              let subtitle = '';
+              friends.forEach((friend) => {
+                subtitle = subtitle.concat(`${friend.firstName} ${friend.lastName}, `);
+              });
+              setCurrentChat({
+                ...result,
+                friends,
+                isGroup,
+                groupAdmin,
+                subtitle,
+                chatName,
+                chatImage,
+                isMute,
+              });
+            }
+            if (!isGroup) {
+              setCurrentChat({
+                ...result,
+                friends,
+                isGroup,
+                chatName,
+                chatImage,
+                isMute,
+              });
+            }
+            setIsChatOpen(true);
+          });
+        } else {
+          setAllChatsData(data);
+        }
+      }),
+    ]);
   }, []);
   return (
     <>

@@ -6,8 +6,15 @@ import useFormValidation from '../utils/useFormValidation';
 import { fetchReducer, initialState, useThunkReducer } from '../utils/fetch';
 import initChatWebSocket from '../utils/WebSockets';
 
-
-function Login({ loggedIn, setLoggedIn, setCurrentUser, setChatWebSocket }) {
+function Login({
+  loggedIn,
+  setLoggedIn,
+  setCurrentUser,
+  setChatWebSocket,
+  setIsInfoPopupOpen,
+  setNotification,
+  setNotificationsQueue,
+}) {
   const navigate = useNavigate();
   const [state, thunkDispatch] = useThunkReducer(fetchReducer, initialState);
   const { values, handleChange, errors, isValid, resetForm, setValues, setIsValid } =
@@ -19,9 +26,17 @@ function Login({ loggedIn, setLoggedIn, setCurrentUser, setChatWebSocket }) {
     if (!isValid) return;
     mainApi.signIn(thunkDispatch, email, password).then(() => {
       mainApi.getUserMe(thunkDispatch).then((response) => {
-        if (response.email) {
-          console.log('initWS');
-          setCurrentUser(response);
+        if (response.user) {
+          const { user, notifications } = response;
+          const dontDisturb = user.dontDisturb.some((value) => value === 'profile');
+          if (!user.image && !dontDisturb) {
+            setIsInfoPopupOpen(true);
+          }
+          setCurrentUser(user);
+          if (notifications.length > 0) {
+            setNotification(notifications[0]);
+            setNotificationsQueue(notifications);
+          }
           setChatWebSocket(initChatWebSocket());
           setLoggedIn(true);
           navigate('/');

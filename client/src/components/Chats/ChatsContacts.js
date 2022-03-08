@@ -49,6 +49,8 @@ function ChatsContacts({
               groupAdmin,
               friends,
               lastMessage,
+              lastMessageByUser,
+              lastMessageBy,
               lastMessageTime,
               unreadCount,
               isMute,
@@ -85,10 +87,14 @@ function ChatsContacts({
 
                   {refsArray[index] ? (
                     <p className="chats__chat-message" ref={refsArray[index].ref}>
+                      <span>{lastMessageByUser ? 'You:' : ''}</span>
                       {lastMessage}
                     </p>
                   ) : (
-                    <p className="chats__chat-message">{lastMessage}</p>
+                    <p className="chats__chat-message">
+                      <span>{lastMessageByUser ? 'You:' : ''}</span>
+                      {lastMessage}
+                    </p>
                   )}
                 </div>
 
@@ -156,6 +162,8 @@ function ChatsContacts({
               groupAdmin,
               friends,
               lastMessage,
+              lastMessageByUser,
+              lastMessageBy,
               lastMessageTime,
               unreadCount,
               isMute,
@@ -191,10 +199,14 @@ function ChatsContacts({
 
                   {refsArray[index] ? (
                     <p className="chats__chat-message" ref={refsArray[index].ref}>
+                      <span>{lastMessageByUser ? 'You:' : ''}</span>
                       {lastMessage}
                     </p>
                   ) : (
-                    <p className="chats__chat-message">{lastMessage}</p>
+                    <p className="chats__chat-message">
+                      <span>{lastMessageByUser ? 'You:' : ''}</span>
+                      {lastMessage}
+                    </p>
                   )}
                 </div>
 

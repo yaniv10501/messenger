@@ -81,7 +81,6 @@ function App() {
             if (notifications.length > 0) {
               setNotification(notifications[0]);
               setNotificationsQueue(notifications);
-              console.log(notifications);
             }
             setChatWebSocket(initChatWebSocket());
             setLoggedIn(true);
@@ -183,9 +182,6 @@ function App() {
       };
     }
   }, [location, chatWebSocket, notificationsQueue]);
-  useEffect(() => {
-    mainApi.getNotifications(thunkDispatch).then((notifList) => setNotificationsQueue(notifList));
-  }, []);
   return (
     <>
       <Loading isLoading={pageLoading} />
@@ -210,6 +206,9 @@ function App() {
                   setLoggedIn={setLoggedIn}
                   setCurrentUser={setCurrentUser}
                   setChatWebSocket={setChatWebSocket}
+                  setIsInfoPopupOpen={setIsInfoPopupOpen}
+                  setNotification={setNotification}
+                  setNotificationsQueue={setNotificationsQueue}
                 />
               }
             />
@@ -239,6 +238,8 @@ function App() {
                     isGroupSettingsPopupOpen={isGroupSettingsPopupOpen}
                     setIsGroupSettingsPopupOpen={setIsGroupSettingsPopupOpen}
                     closeAllPopups={closeAllPopups}
+                    setNotification={setNotification}
+                    setNotificationsQueue={setNotificationsQueue}
                   />
                 </ProtectedRoute>
               }
@@ -247,7 +248,11 @@ function App() {
               path="/addfriends"
               element={
                 <ProtectedRoute loggedIn={loggedIn}>
-                  <AddFriends chatWebSocket={chatWebSocket} />
+                  <AddFriends
+                    chatWebSocket={chatWebSocket}
+                    setNotification={setNotification}
+                    setNotificationsQueue={setNotificationsQueue}
+                  />
                 </ProtectedRoute>
               }
             />
