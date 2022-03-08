@@ -220,7 +220,7 @@ function Chats({
           if (result[0]) {
             return { ...chat, unreadCount: 0, isOnline: result[1] };
           }
-          return { ...chat, isOnline: result[1] };
+          return { ...chat, isOnline: result[1] || chat.isOnline };
         }
         return chat;
       });

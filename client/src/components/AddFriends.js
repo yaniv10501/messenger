@@ -130,9 +130,10 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
   };
   const handleUserSearch = () => {
     console.log(userQuery);
-    mainApi
-      .findOtherUsers(thunkDispatch, userQuery)
-      .then((response) => setAddFriendsList(response));
+    mainApi.findOtherUsers(thunkDispatch, userQuery).then(({ loadedAll, moreFriendsList }) => {
+      setAddFriendsList(moreFriendsList);
+      setLoadedAllFriends(loadedAll);
+    });
   };
   useEffect(() => {
     mainApi.deleteNotificationType(thunkDispatch, 'friend').then((notifications) => {
