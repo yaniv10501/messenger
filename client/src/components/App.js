@@ -101,7 +101,7 @@ function App() {
     }
   }, [location]);
   useEffect(() => {
-    if (chatWebSocket) {
+    if (chatWebSocket && location.pathname === '/') {
       chatWebSocket.onmessage = (wsMessage) => {
         const { message, data } = JSON.parse(wsMessage.data);
         console.log(data);

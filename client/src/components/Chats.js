@@ -671,6 +671,7 @@ function Chats({
     isUserTyping,
     chatTypingTimers,
     refsArray,
+    setCurrentChat,
     isChatOpen,
     isMobile,
   ]);
