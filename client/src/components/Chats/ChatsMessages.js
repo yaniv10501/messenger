@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import Preloader from '../Preloader/Preloader';
 import noProfile from '../../images/no-profile.png';
 import sendIcon from '../../images/send.png';
@@ -20,6 +20,18 @@ function ChatsMessages({
   handleChange,
   handleKey,
 }) {
+  const [chatTimeRefs, setChatTimeRefs] = useState([]);
+  useEffect(() => {
+    if (currentChat.messages && currentChat.messages.length > 0) {
+      const newTimeRef = [];
+      currentChat.messages.forEach((message) => {
+        if (!message.messageContent && message.chatTime) {
+          newTimeRef.push(createRef());
+          setChatTimeRefs(newTimeRef);
+        }
+      });
+    }
+  }, [currentChat.messages]);
   return isMobile ? (
     <div className="chats__chat-messages-container">
       {currentChat.messages ? (
@@ -48,10 +60,17 @@ function ChatsMessages({
                     isUser._id === currentChat._id ? isUser.isTyping : false
                   ) && userTypingText}
                 </p>
-                {currentChat.isGroup && (
+                {currentChat.isGroup ? (
                   <p className="chats__friend-header-bottom-title">
                     Friends:
                     <span className="chats__friend-header-bottom-text">{currentChat.subtitle}</span>
+                  </p>
+                ) : (
+                  <p className="chats__friend-header-bottom-title">
+                    {currentChat.isOnline.online ? 'Online' : ''}
+                    <span className="chats__friend-header-bottom-text">
+                      {currentChat.isOnline.online ? '' : `Was online ${currentChat.isOnline.time}`}
+                    </span>
                   </p>
                 )}
               </div>
@@ -66,11 +85,8 @@ function ChatsMessages({
           >
             {currentChat.messages.length > 0
               ? currentChat.messages.map(
-                  (
-                    { messageByUser, messageBy, messageContent, messageTime, messageDate },
-                    index
-                  ) => {
-                    if (messageByUser)
+                  ({ messageByUser, messageBy, messageContent, messageTime, chatTime }, index) => {
+                    if (messageByUser) {
                       return (
                         <div className="chats__message chats__message_user" key={index}>
                           <div className="chats__message-content">
@@ -80,7 +96,14 @@ function ChatsMessages({
                           </div>
                         </div>
                       );
-                    else
+                    } else {
+                      if (!messageContent && chatTime) {
+                        return (
+                          <div className="chats__message-time" key={index} ref={chatTimeRefs.shift()}>
+                            <p className="chats__message-time-text">{chatTime}</p>
+                          </div>
+                        );
+                      }
                       return (
                         <div className="chats__message chats__message_friend" key={index}>
                           {currentChat.isGroup && <p className="chats__message-by">{messageBy}</p>}
@@ -91,6 +114,7 @@ function ChatsMessages({
                           </div>
                         </div>
                       );
+                    }
                   }
                 )
               : ''}
@@ -169,11 +193,8 @@ function ChatsMessages({
           >
             {currentChat.messages.length > 0
               ? currentChat.messages.map(
-                  (
-                    { messageByUser, messageBy, messageContent, messageTime, messageDate },
-                    index
-                  ) => {
-                    if (messageByUser)
+                  ({ messageByUser, messageBy, messageContent, messageTime, chatTime }, index) => {
+                    if (messageByUser) {
                       return (
                         <div className="chats__message chats__message_user" key={index}>
                           <div className="chats__message-content">
@@ -183,7 +204,14 @@ function ChatsMessages({
                           </div>
                         </div>
                       );
-                    else
+                    } else {
+                      if (!messageContent && chatTime) {
+                        return (
+                          <div className="chats__message-time" key={index} ref={chatTimeRefs.shift()}>
+                            <p className="chats__message-time-text">{chatTime}</p>
+                          </div>
+                        );
+                      }
                       return (
                         <div className="chats__message chats__message_friend" key={index}>
                           {currentChat.isGroup && <p className="chats__message-by">{messageBy}</p>}
@@ -194,6 +222,7 @@ function ChatsMessages({
                           </div>
                         </div>
                       );
+                    }
                   }
                 )
               : ''}

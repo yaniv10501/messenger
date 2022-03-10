@@ -9,6 +9,23 @@
   flex-direction: column;
 }
 
+.chats__message-time {
+  background-color: var(--greyColor);
+  margin: 10px auto;
+  padding: 10px;
+  width: fit-content;
+  max-width: 500px;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chats__message-time-text {
+  margin: 0 5px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
 @media screen and (max-width: 945px) {
   .chats__message {
     max-width: 320px;
