@@ -1,6 +1,5 @@
 .chats__messages-container {
   z-index: 0;
-  position: relative;
   overflow-y: scroll;
   height: 500px;
   flex-grow: 1;

@@ -73,7 +73,7 @@ function NewGroupPopup({
       .initNewGroup(thunkDispatch, groupId, groupName, formData, selectedFriends)
       .then((response) => {
         handleClose();
-        createNewGroup(groupId, groupName, selectedFriends, formData)
+        createNewGroup(response);
       });
   };
   useEffect(() => {
@@ -129,7 +129,9 @@ function NewGroupPopup({
               selectedFriends.length > 0 &&
               selectedFriends.map(({ _id, firstName, lastName }) => (
                 <li className="popup__new-group-selcted-friend" key={_id}>
-                  <p className="popup__new-group-selcted-friend-name">{firstName} {lastName}</p>
+                  <p className="popup__new-group-selcted-friend-name">
+                    {firstName} {lastName}
+                  </p>
                   <button
                     className="popup__new-group-diselect-friend-button"
                     onClick={() => removeSelectedFriend(_id)}

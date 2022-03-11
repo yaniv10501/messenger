@@ -54,18 +54,9 @@ function Chats({
     setCurrentChat({});
   };
 
-  const createNewGroup = (chatId, chatName, friends, image) => {
+  const createNewGroup = (newGroup) => {
     setAllChatsData([
-      {
-        _id: chatId,
-        chatName,
-        friends,
-        groupAdmin: '',
-        image: '',
-        isGroup: true,
-        isMute: 0,
-        unreadCount: 0,
-      },
+      newGroup,
       ...allChatsData,
     ]);
   };
@@ -76,8 +67,9 @@ function Chats({
     mainApi.setUserTyping(thunkDispatch, chatId, friends).then((response) => console.log(response));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event, options) => {
     event.preventDefault();
+    const { today = false } = options || {};
     if (messageInput === '') return;
     const { current: messagesContainer } = messagesContainerRef;
     messagesContainer.scrollTo({
@@ -89,18 +81,35 @@ function Chats({
       .sendMessage(thunkDispatch, messageInput, chatId, friends, isMute, isGroup)
       .then((response) => {
         const { data: newMessage } = response;
+        console.log(newMessage);
         const { messages: currentChatMessages } = currentChat;
-        if (currentChatMessages) {
-          setCurrentChat({
-            ...currentChat,
-            messages: [newMessage, ...currentChatMessages],
-          });
-        }
-        if (!currentChatMessages) {
-          setCurrentChat({
-            ...currentChat,
-            messages: [newMessage],
-          });
+        console.log(today);
+        if (today) {
+          if (currentChatMessages) {
+            setCurrentChat({
+              ...currentChat,
+              messages: [newMessage, { chatTime: 'Today' }, ...currentChatMessages],
+            });
+          }
+          if (!currentChatMessages) {
+            setCurrentChat({
+              ...currentChat,
+              messages: [newMessage, { chatTime: 'Today' }],
+            });
+          }
+        } else {
+          if (currentChatMessages) {
+            setCurrentChat({
+              ...currentChat,
+              messages: [newMessage, ...currentChatMessages],
+            });
+          }
+          if (!currentChatMessages) {
+            setCurrentChat({
+              ...currentChat,
+              messages: [newMessage],
+            });
+          }
         }
         const currentChatData = allChatsData.find((chat) => chat._id === chatId);
         console.log(currentChatData);
@@ -132,7 +141,7 @@ function Chats({
           };
           const newAllChatsData = allChatsData.filter((chat) => chat._id !== chatId);
           const chatRef = refsArray.find((ref) => ref._id === chatId);
-          if (chatRef) {
+          if (chatRef && (!isMobile || !isChatOpen)) {
             const {
               ref: { current: lastMessageTarget },
             } = chatRef;
@@ -144,7 +153,7 @@ function Chats({
       });
   };
 
-  const handleKey = (event) => handleKeyPress(event, handleSubmit);
+  const handleKey = (event, handleSubmit) => handleKeyPress(event, handleSubmit);
 
   const handleChatClick = (
     chatId,
@@ -282,7 +291,6 @@ function Chats({
     });
   };
   const handleMessagesScroll = (event) => {
-    console.log(loadedAllMessages);
     if (!loadedAllMessages) {
       if (!silentLoading) {
         const {
@@ -578,7 +586,9 @@ function Chats({
               const { timer, interval } = chatTypingTimer;
               clearTimeout(timer);
               const chatTimer = setTimeout(() => {
-                const { lastMessage, lastMessageByUser } = allChatsData.find((chat) => chat._id === chatId);
+                const { lastMessage, lastMessageByUser } = allChatsData.find(
+                  (chat) => chat._id === chatId
+                );
                 lastMessageTarget.textContent = lastMessage;
                 const newChatTimers = chatTypingTimers.filter(
                   (chatTimer) => chatTimer._id !== chatId
@@ -651,13 +661,26 @@ function Chats({
             return imagePromise.then((result) => result);
           });
           Promise.all(listWithImages).then((friendsList) => {
-            setAllChatsData([
-              {
-                ...group,
-                friends: friendsList,
-              },
-              ...allChatsData,
-            ]);
+            const { image } = group;
+            if (image) {
+              mainApi.getGroupImage(thunkDispatch, group).then((groupWithImage) => {
+                setAllChatsData([
+                  {
+                    ...groupWithImage,
+                    friends: friendsList,
+                  },
+                  ...allChatsData,
+                ]);
+              });
+            } else {
+              setAllChatsData([
+                {
+                  ...group,
+                  friends: friendsList,
+                },
+                ...allChatsData,
+              ]);
+            }
           });
         }
       };
@@ -679,9 +702,9 @@ function Chats({
   useEffect(() => {
     console.log(allChatsData);
     if (allChatsData.length > 0) {
-      setRefsArray((refsArray) =>
+      setRefsArray((refsArrayState) =>
         allChatsData.map(({ _id }, i) => {
-          const currentRef = refsArray[i];
+          const currentRef = refsArrayState[i];
           if (currentRef) {
             if (currentRef._id === _id) {
               return currentRef;
@@ -694,9 +717,9 @@ function Chats({
           return { _id, ref: createRef() };
         })
       );
-      setIsUserTyping((isUserTyping) =>
+      setIsUserTyping((isUserTypingState) =>
         allChatsData.map(({ _id }, i) => {
-          const currentRef = isUserTyping[i];
+          const currentRef = isUserTypingState[i];
           if (currentRef) {
             if (currentRef._id === _id) {
               return currentRef;

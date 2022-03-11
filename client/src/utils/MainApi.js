@@ -102,7 +102,7 @@ class MainApi {
       } else {
         useFetch(
           dispatch,
-          `${this.baseUrl}/image/${group._id}?listType=${listType}`,
+          `${this.baseUrl}/group/image/${group._id}?listType=${listType}`,
           {
             credentials: 'include',
           },
@@ -656,7 +656,7 @@ class MainApi {
               credentials: 'include',
             },
             { silent: true }
-          ).then((response) => response)
+          ).then((response) => this.getGroupImage(dispatch, response))
         )
       : useFetch(
           dispatch,

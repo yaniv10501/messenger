@@ -20,18 +20,162 @@ function ChatsMessages({
   handleChange,
   handleKey,
 }) {
+  let chatTimeIndex = 0;
+  let animation;
+  const [chatScrollIndex, setChatScrollIndex] = useState(0);
   const [chatTimeRefs, setChatTimeRefs] = useState([]);
-  useEffect(() => {
-    if (currentChat.messages && currentChat.messages.length > 0) {
-      const newTimeRef = [];
-      currentChat.messages.forEach((message) => {
-        if (!message.messageContent && message.chatTime) {
-          newTimeRef.push(createRef());
-          setChatTimeRefs(newTimeRef);
+  const handleSendMessage = (event) => {
+    console.log(
+      chatTimeRefs[1]?.current?.firstChild?.textContent !== 'Today' && chatTimeRefs.length > 1
+    );
+    console.log(chatTimeRefs.length < 1);
+    if (
+      (chatTimeRefs[1]?.current?.firstChild?.textContent !== 'Today' && chatTimeRefs.length > 1) ||
+      chatTimeRefs.length < 1
+    ) {
+      handleSubmit(event, { today: true });
+    } else {
+      handleSubmit(event);
+    }
+  };
+  const handleKeyPress = (event) => {
+    handleKey(event, handleSendMessage);
+  };
+  const handleMessagesContainerScroll = (event) => {
+    const currentChatTime = chatTimeRefs[0] ? chatTimeRefs[0].current : null;
+    const nextChatTime = chatTimeRefs[chatScrollIndex + 1]
+      ? chatTimeRefs[chatScrollIndex + 1].current
+      : null;
+    const prevChatTime = chatTimeRefs[chatScrollIndex]
+      ? chatTimeRefs[chatScrollIndex].current
+      : null;
+    const { style } = currentChatTime || {};
+    if (style) {
+      if (!animation) {
+        if (currentChatTime) {
+          animation = currentChatTime.animate(
+            [
+              {
+                opacity: 0,
+              },
+              {
+                opacity: 1,
+              },
+              {
+                opacity: 0,
+              },
+            ],
+            {
+              duration: 2000,
+              easing: 'cubic-bezier(0,.99,1,.08)',
+            }
+          );
+          animation.play();
+          animation.onfinish = () => {
+            animation = null;
+          };
         }
+      } else {
+        if (animation.currentTime > 750) {
+          style.opacity = 1;
+          animation.cancel();
+          animation = currentChatTime.animate(
+            [
+              {
+                opacity: 1,
+              },
+              {
+                opacity: 0,
+              },
+            ],
+            {
+              duration: 2000,
+              easing: 'cubic-bezier(1,0,1,0)',
+            }
+          );
+          animation.play();
+          animation.onfinish = () => {
+            animation = null;
+            style.opacity = 0;
+          };
+        }
+      }
+    }
+    if (nextChatTime || prevChatTime) {
+      const { y: currentY } = currentChatTime ? currentChatTime.getBoundingClientRect() : {};
+      const { y: nextY } = nextChatTime ? nextChatTime.getBoundingClientRect() : {};
+      const { y: prevY } = prevChatTime ? prevChatTime.getBoundingClientRect() : {};
+      if (currentY - nextY < 30) {
+        animation.cancel();
+        const nextTime = nextChatTime.firstChild.textContent;
+        nextChatTime.firstChild.textContent = currentChatTime.firstChild.textContent;
+        currentChatTime.firstChild.textContent = nextTime;
+        setChatScrollIndex((value) => value + 1);
+      }
+      if (chatScrollIndex !== 0 && prevY - currentY < 20) {
+        const prevTime = prevChatTime.firstChild.textContent;
+        prevChatTime.firstChild.textContent = currentChatTime.firstChild.textContent;
+        currentChatTime.firstChild.textContent = prevTime;
+        setChatScrollIndex((value) => value - 1);
+      }
+    }
+    handleMessagesScroll(event);
+  };
+  useEffect(() => {
+    const { messages } = currentChat || {};
+    if (messages && messages.length > 0) {
+      setChatTimeRefs((chatTimeRefsState) => {
+        const newRefs = [];
+        let i = 0;
+        let updateToday;
+        messages.forEach((message) => {
+          if (!message.messageContent && message.chatTime) {
+            if (
+              message.chatTime === 'Today' &&
+              chatTimeRefsState[0]?.current?.firstChild?.textContent === 'Today' &&
+              chatTimeRefs.length > 1
+            ) {
+              updateToday = true;
+            } else {
+              const currentRef = chatTimeRefsState[i];
+              if (!currentRef) {
+                newRefs.push(createRef());
+              }
+              i += 1;
+            }
+          }
+        });
+        console.log(updateToday);
+        if (updateToday) {
+          return [createRef(), ...chatTimeRefsState, ...newRefs];
+        }
+        return [...chatTimeRefsState, ...newRefs];
       });
     }
-  }, [currentChat.messages]);
+  }, [currentChat]);
+  useEffect(() => {
+    if (chatTimeRefs[0]) {
+      const currentChatTime = chatTimeRefs[0].current;
+      if (currentChatTime) {
+        if (currentChatTime.firstChild.textContent === 'Today') {
+          const nextChatTime = chatTimeRefs[1] ? chatTimeRefs[1].current : null;
+          if (nextChatTime) {
+            const nextTime = nextChatTime.firstChild.textContent;
+            nextChatTime.firstChild.textContent = currentChatTime.firstChild.textContent;
+            currentChatTime.firstChild.textContent = nextTime;
+            setChatScrollIndex(1);
+          }
+        }
+        console.log(currentChatTime);
+        const { style } = currentChatTime;
+        style.opacity = 0;
+        style.position = 'absolute';
+        style.top = '190px';
+        style.left = '50%';
+        style.transform = 'translateX(-50%)';
+      }
+    }
+  }, [chatTimeRefs]);
   return isMobile ? (
     <div className="chats__chat-messages-container">
       {currentChat.messages ? (
@@ -81,14 +225,28 @@ function ChatsMessages({
             id="messagesContainer"
             className="chats__messages-container no-scroll-bar"
             ref={messagesContainerRef}
-            onScroll={handleMessagesScroll}
+            onScroll={handleMessagesContainerScroll}
           >
             {currentChat.messages.length > 0
               ? currentChat.messages.map(
-                  ({ messageByUser, messageBy, messageContent, messageTime, chatTime }, index) => {
+                  (
+                    {
+                      _id,
+                      messageByUser,
+                      messageBy,
+                      messageContent,
+                      messageTime,
+                      chatTime,
+                      groupMessage,
+                    },
+                    index
+                  ) => {
+                    if (index === 0) {
+                      chatTimeIndex = 0;
+                    }
                     if (messageByUser) {
                       return (
-                        <div className="chats__message chats__message_user" key={index}>
+                        <div className="chats__message chats__message_user" key={_id}>
                           <div className="chats__message-content">
                             <p className="chats__message-text">{messageContent}</p>
 
@@ -98,14 +256,31 @@ function ChatsMessages({
                       );
                     } else {
                       if (!messageContent && chatTime) {
-                        return (
-                          <div className="chats__message-time" key={index} ref={chatTimeRefs.shift()}>
+                        console.log(chatTime);
+                        chatTimeIndex += 1;
+                        return chatTimeRefs[chatTimeIndex - 1] ? (
+                          <div
+                            className="chats__message-time"
+                            key={chatTime}
+                            ref={chatTimeRefs[chatTimeIndex - 1]}
+                          >
+                            <p className="chats__message-time-text">{chatTime}</p>
+                          </div>
+                        ) : (
+                          <div className="chats__message-time" key={chatTime}>
                             <p className="chats__message-time-text">{chatTime}</p>
                           </div>
                         );
                       }
+                      if (groupMessage) {
+                        return (
+                          <div className="chats__message-time" key={groupMessage}>
+                            <p className="chats__message-time-text">{groupMessage}</p>
+                          </div>
+                        );
+                      }
                       return (
-                        <div className="chats__message chats__message_friend" key={index}>
+                        <div className="chats__message chats__message_friend" key={_id}>
                           {currentChat.isGroup && <p className="chats__message-by">{messageBy}</p>}
                           <div className="chats__message-content">
                             <p className="chats__message-text">{messageContent}</p>
@@ -131,12 +306,12 @@ function ChatsMessages({
             </div>
           </div>
 
-          <form className="chats__send-form" name="message" onSubmit={handleSubmit}>
+          <form className="chats__send-form" name="message" onSubmit={handleSendMessage}>
             <textarea
               className="chats__message-input"
               value={messageInput}
               onChange={handleChange}
-              onKeyPress={handleKey}
+              onKeyPress={handleKeyPress}
             ></textarea>
 
             <button type="submit" className="chats__send-button">
@@ -189,14 +364,28 @@ function ChatsMessages({
             id="messagesContainer"
             className="chats__messages-container no-scroll-bar"
             ref={messagesContainerRef}
-            onScroll={handleMessagesScroll}
+            onScroll={handleMessagesContainerScroll}
           >
             {currentChat.messages.length > 0
               ? currentChat.messages.map(
-                  ({ messageByUser, messageBy, messageContent, messageTime, chatTime }, index) => {
+                  (
+                    {
+                      _id,
+                      messageByUser,
+                      messageBy,
+                      messageContent,
+                      messageTime,
+                      chatTime,
+                      groupMessage,
+                    },
+                    index
+                  ) => {
+                    if (index === 0) {
+                      chatTimeIndex = 0;
+                    }
                     if (messageByUser) {
                       return (
-                        <div className="chats__message chats__message_user" key={index}>
+                        <div className="chats__message chats__message_user" key={_id}>
                           <div className="chats__message-content">
                             <p className="chats__message-text">{messageContent}</p>
 
@@ -206,14 +395,30 @@ function ChatsMessages({
                       );
                     } else {
                       if (!messageContent && chatTime) {
-                        return (
-                          <div className="chats__message-time" key={index} ref={chatTimeRefs.shift()}>
+                        chatTimeIndex += 1;
+                        return chatTimeRefs[chatTimeIndex - 1] ? (
+                          <div
+                            className="chats__message-time"
+                            key={chatTime}
+                            ref={chatTimeRefs[chatTimeIndex - 1]}
+                          >
+                            <p className="chats__message-time-text">{chatTime}</p>
+                          </div>
+                        ) : (
+                          <div className="chats__message-time" key={chatTime}>
                             <p className="chats__message-time-text">{chatTime}</p>
                           </div>
                         );
                       }
+                      if (groupMessage) {
+                        return (
+                          <div className="chats__message-time" key={groupMessage}>
+                            <p className="chats__message-time-text">{groupMessage}</p>
+                          </div>
+                        );
+                      }
                       return (
-                        <div className="chats__message chats__message_friend" key={index}>
+                        <div className="chats__message chats__message_friend" key={_id}>
                           {currentChat.isGroup && <p className="chats__message-by">{messageBy}</p>}
                           <div className="chats__message-content">
                             <p className="chats__message-text">{messageContent}</p>
@@ -239,12 +444,12 @@ function ChatsMessages({
             </div>
           </div>
 
-          <form className="chats__send-form" name="message" onSubmit={handleSubmit}>
+          <form className="chats__send-form" name="message" onSubmit={handleSendMessage}>
             <textarea
               className="chats__message-input"
               value={messageInput}
               onChange={handleChange}
-              onKeyPress={handleKey}
+              onKeyPress={handleKeyPress}
             ></textarea>
 
             <button type="submit" className="chats__send-button">
