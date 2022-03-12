@@ -10,3 +10,12 @@
   height: 100px;
   width: 100px;
 }
+
+@media screen and (max-width: 1400px) {
+  .add-friends__more-friend-image,
+  .add-friends__request-friend-image,
+  .add-friends__pending-friend-image {
+    height: 100px;
+    width: 100px;
+  }
+}

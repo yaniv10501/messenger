@@ -12,12 +12,19 @@ function FriendCard({
   buttonAlt,
   buttonReadyText,
   buttonActiveText,
+  buttonAltReadyText,
+  buttonAltActiveText,
   classType,
 }) {
   const [buttonText, setButtonText] = useState(buttonReadyText);
-  const handleFriendAction = () => {
-    setButtonText(buttonActiveText);
-    friendAction(_id, index, image);
+  const [buttonAltText, setButtonAltText] = useState(buttonAltReadyText);
+  const handleFriendAction = (response) => {
+    if (response === true) {
+      setButtonText(buttonActiveText);
+    } else {
+      setButtonAltText(buttonAltActiveText);
+    }
+    friendAction(_id, index, image, response);
   };
   return (
     <div className={`add-friends__${classType}-friend-container`} key={_id}>
@@ -31,7 +38,10 @@ function FriendCard({
           {firstName} {lastName}
         </h2>
         <div className={`add-friends__${classType}-buttons-container`}>
-          <button className={`add-friends__${classType}-add-button`} onClick={handleFriendAction}>
+          <button
+            className={`add-friends__${classType}-add-button`}
+            onClick={() => handleFriendAction(true)}
+          >
             <img
               className={`add-friends__${classType}-add-icon`}
               src={buttonIcon}
@@ -39,8 +49,11 @@ function FriendCard({
             />
             <p className={`add-friends__${classType}-add-text`}>{buttonText}</p>
           </button>
-          <button className={`add-friends__${classType}-add-button`} onClick={handleFriendAction}>
-            <p className={`add-friends__${classType}-block-text`}>Block</p>
+          <button
+            className={`add-friends__${classType}-add-button`}
+            onClick={() => handleFriendAction(false)}
+          >
+            <p className={`add-friends__${classType}-block-text`}>{buttonAltText}</p>
           </button>
         </div>
       </div>

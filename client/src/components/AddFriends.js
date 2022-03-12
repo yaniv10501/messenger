@@ -21,8 +21,8 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
   const [pendingFriendRequestsList, setPendingFriendRequestsList] = useState([]);
   const [userQuery, setUserQuery] = useState('');
   const handleBack = () => navigate('/');
-  const handleAddFriend = (friendId, index, image) =>
-    mainApi.addFriend(thunkDispatch, friendId, index).then((response) => {
+  const handleAddFriend = (friendId, index, image, requestResponse) =>
+    mainApi.addFriend(thunkDispatch, friendId, index, requestResponse).then((response) => {
       const newAddFriendsList = addFriendsList.filter((friend) => friend._id !== friendId);
       if ((!image && response.image === 'Uploaded') || image === 'Uploaded') {
         mainApi
@@ -56,13 +56,15 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
       }
       setAddFriendsList(newAddFriendsList);
     });
-  const handleAcceptRequest = (requestId, index, image) =>
-    mainApi.acceptFriendRequest(thunkDispatch, requestId, index).then((response) => {
-      const newPendingFriendsList = pendingFriendRequestsList.filter(
-        (friend) => friend._id !== requestId
-      );
-      setPendingFriendRequestsList(newPendingFriendsList);
-    });
+  const handleAcceptRequest = (requestId, index, image, requestResponse) =>
+    mainApi
+      .responseFriendRequest(thunkDispatch, requestId, index, requestResponse)
+      .then((response) => {
+        const newPendingFriendsList = pendingFriendRequestsList.filter(
+          (friend) => friend._id !== requestId
+        );
+        setPendingFriendRequestsList(newPendingFriendsList);
+      });
   const handleFriendsScroll = (event) => {
     if (!loadedAllFriends) {
       if (!silentLoading) {
@@ -220,6 +222,8 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
                   buttonAlt="Add button"
                   buttonReadyText="Add"
                   buttonActiveText="Sent"
+                  buttonAltReadyText="Block"
+                  buttonAltActiveText="Blocked"
                   classType="more"
                 />
               ))}
@@ -257,6 +261,8 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
                   buttonAlt="Add button"
                   buttonReadyText="Remove"
                   buttonActiveText="Removed"
+                  buttonAltReadyText="Block"
+                  buttonAltActiveText="Blocked"
                   classType="request"
                 />
               ))}
@@ -294,6 +300,8 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
                   buttonAlt="Add button"
                   buttonReadyText="Accept"
                   buttonActiveText="Accepted"
+                  buttonAltReadyText="Decline"
+                  buttonAltActiveText="Declined"
                   classType="pending"
                 />
               ))}

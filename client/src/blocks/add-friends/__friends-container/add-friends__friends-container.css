@@ -5,7 +5,7 @@
   border: 1px solid var(--blackColor);
   box-shadow: 0 0 2px 1px var(--blackColor);
   background-color: var(--platinumColor);
-  margin: 10px 0
+  margin: 10px 0;
 }
 
 .add-friends__more-friends {
@@ -15,7 +15,8 @@
   height: calc(100% - 300px);
 }
 
-.add-friends__more-friends-container {
+.add-friends__more-friends-container,
+.add-friends__friend-requests-container {
   display: grid;
   justify-content: center;
   grid-template-columns: repeat(auto-fit, 400px);
@@ -27,9 +28,6 @@
 .add-friends__friend-requests {
   width: 35%;
   height: calc(100% - 300px);
-}
-
-.add-friends__friend-requests-container {
 }
 
 .add-friends__pending {
@@ -44,6 +42,13 @@
   display: flex;
   padding: 10px 20px 30px 20px;
   overflow: scroll;
+}
+
+@media screen and (max-width: 1400px) {
+  .add-friends__more-friends-container,
+  .add-friends__friend-requests-container {
+    grid-template-columns: repeat(auto-fit, 350px);
+  }
 }
 
 @media screen and (max-width: 945px) {
@@ -62,5 +67,10 @@
   .add-friends__pending {
     margin: 0 20px 20px 20px;
     height: 50%;
+  }
+
+  .add-friends__pending-container {
+    flex-direction: column;
+    align-items: center;
   }
 }

@@ -1,10 +1,10 @@
-.add-friends__more-add-icon,
-.add-friends__request-add-icon {
+.add-friends__more-add-icon {
   height: 25px;
   width: 25px;
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
-.add-friends__pending-add-icon {
+.add-friends__pending-add-icon,
+.add-friends__request-add-icon {
   display: none;
 }

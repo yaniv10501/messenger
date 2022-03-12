@@ -532,10 +532,10 @@ class MainApi {
     };
   };
 
-  addFriend = (dispatch, friendId, index) =>
+  addFriend = (dispatch, friendId, index, requestResponse) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/friends/${friendId}/${index}`,
+      `${this.baseUrl}/friends/add/${friendId}/${index}?response=${requestResponse}`,
       {
         method: 'POST',
         credentials: 'include',
@@ -543,10 +543,10 @@ class MainApi {
       { silent: true }
     ).then((response) => response);
 
-  acceptFriendRequest = (dispatch, requestId, index) =>
+  responseFriendRequest = (dispatch, requestId, index, requestResponse) =>
     useFetch(
       dispatch,
-      `${this.baseUrl}/accept/${requestId}?index=${index}`,
+      `${this.baseUrl}/friends/response/${requestId}?index=${index}&response=${requestResponse}`,
       {
         credentials: 'include',
         method: 'POST',

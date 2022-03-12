@@ -178,6 +178,27 @@ function App() {
                 animateMenu(menuRef.current);
               });
           }
+          if (message === 'Friend decline') {
+            mainApi
+              .getFriendImage(thunkDispatch, data, {
+                listType: 'friends',
+              })
+              .then((friendWithImage) => {
+                console.log(friendWithImage);
+                setNotification({
+                  type: 'Friend decline',
+                  user: friendWithImage,
+                });
+                setNotificationsQueue([
+                  {
+                    type: 'Friend decline',
+                    user: friendWithImage,
+                  },
+                  ...notificationsQueue,
+                ]);
+                animateMenu(menuRef.current);
+              });
+          }
         }
       };
     }

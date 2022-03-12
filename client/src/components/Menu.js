@@ -64,6 +64,8 @@ function Menu({
           case 'Friend accept':
             navigate('/chats');
             break;
+          case 'Friend decline':
+            break;
           default:
             break;
         }
@@ -122,6 +124,11 @@ function Menu({
                 {notification.type === 'Friend accept' && (
                   <>
                     <p className="menu__notif-text">Accepted your friend request</p>
+                  </>
+                )}
+                {notification.type === 'Friend decline' && (
+                  <>
+                    <p className="menu__notif-text">declined your friend request</p>
                   </>
                 )}
               </div>
