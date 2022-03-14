@@ -104,7 +104,6 @@ function App() {
     if (chatWebSocket && location.pathname === '/') {
       chatWebSocket.onmessage = (wsMessage) => {
         const { message, data } = JSON.parse(wsMessage.data);
-        console.log(data);
         if (location.pathname !== '/chats') {
           if (message === 'New message') {
             const friend = data.user;
@@ -117,7 +116,6 @@ function App() {
                 }
               )
               .then((friendWithImage) => {
-                console.log(friendWithImage);
                 setNotification({
                   type: 'New message',
                   ...data,
@@ -142,7 +140,6 @@ function App() {
                 listType: 'pendingRequests',
               })
               .then((friendWithImage) => {
-                console.log(friendWithImage);
                 setNotification({
                   type: 'Friend request',
                   user: friendWithImage,
@@ -163,7 +160,6 @@ function App() {
                 listType: 'friends',
               })
               .then((friendWithImage) => {
-                console.log(friendWithImage);
                 setNotification({
                   type: 'Friend accept',
                   user: friendWithImage,
@@ -184,7 +180,6 @@ function App() {
                 listType: 'friends',
               })
               .then((friendWithImage) => {
-                console.log(friendWithImage);
                 setNotification({
                   type: 'Friend decline',
                   user: friendWithImage,

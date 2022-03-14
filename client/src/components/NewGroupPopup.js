@@ -53,7 +53,6 @@ function NewGroupPopup({
   };
   const removeSelectedFriend = (_id) => {
     setSelectedFriends(selectedFriends.filter(({ _id: friendId }) => friendId !== _id));
-    console.log(refsArray);
     const {
       ref: { current: friendButton },
     } = refsArray.find(({ _id: friendId }) => friendId === _id);

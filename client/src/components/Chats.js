@@ -81,9 +81,7 @@ function Chats({
       .sendMessage(thunkDispatch, messageInput, chatId, friends, isMute, isGroup)
       .then((response) => {
         const { data: newMessage } = response;
-        console.log(newMessage);
         const { messages: currentChatMessages } = currentChat;
-        console.log(today);
         if (today) {
           if (currentChatMessages) {
             setCurrentChat({
@@ -112,7 +110,6 @@ function Chats({
           }
         }
         const currentChatData = allChatsData.find((chat) => chat._id === chatId);
-        console.log(currentChatData);
         if (!currentChatData) {
           const { chatName, chatImage } = currentChat;
           const { messageContent: lastMessage, messageTime: lastMessageTime } = newMessage;
@@ -165,7 +162,6 @@ function Chats({
     friends,
     unreadCount
   ) => {
-    console.log(isGroup);
     const { _id } = currentChat;
     if (_id) {
       const { current: messagesContainer } = messagesContainerRef;
@@ -180,12 +176,10 @@ function Chats({
     const resetUnreadPromise =
       unreadCount > 0
         ? mainApi.resetChatUnread(thunkDispatch, chatId).then((response) => {
-            console.log(response);
             return true;
           })
         : null;
     const messagesPromise = mainApi.getMessages(thunkDispatch, chatId).then((result) => {
-      console.log(result);
       const { loadedAll } = result;
       if (loadedAll) {
         setLoadedAllMessages(true);
@@ -220,7 +214,6 @@ function Chats({
         });
       }
       setIsChatOpen(true);
-      console.log(result);
       return result.isOnline;
     });
     Promise.all([resetUnreadPromise, messagesPromise]).then((result) => {
@@ -234,12 +227,10 @@ function Chats({
         return chat;
       });
       setAllChatsData(newChats);
-      console.log(result[0], result[1]);
     });
   };
   const handleOpenCompose = () => {
     mainApi.getComposeList(thunkDispatch).then((composeListResult) => {
-      console.log(composeListResult);
       setComposeList(composeListResult);
       setIsComposePopupOpen(true);
     });
@@ -258,7 +249,6 @@ function Chats({
         top: 0,
         left: 0,
       });
-      console.log(_id);
       mainApi.leaveChat(thunkDispatch, _id).then((response) => {
         console.log(response);
       });
@@ -279,14 +269,12 @@ function Chats({
   };
   const handleOpenNewGroup = () => {
     mainApi.getGroupFriendsList(thunkDispatch).then((friendsListResult) => {
-      console.log(friendsListResult);
       setIsNewGroupPopupOpen(true);
       setFriendsList(friendsListResult);
     });
   };
   const handleBack = () => {
     mainApi.leaveChats(thunkDispatch).then((result) => {
-      console.log(result);
       navigate('/');
     });
   };
@@ -300,10 +288,8 @@ function Chats({
           current: { offsetTop },
         } = messagesPreloaderRef;
         if (scrollTop - offsetTop < 120) {
-          console.log('Time to load more!');
           if (!loadedAllMessages) {
             mainApi.getMoreMessages(thunkDispatch, currentChat._id).then((moreMessages) => {
-              console.log(moreMessages);
               const { messages: currentChatMessages } = currentChat;
               setCurrentChat({
                 ...currentChat,
@@ -325,9 +311,7 @@ function Chats({
         const {
           current: { offsetTop },
         } = chatPreloaderRef;
-        console.log(offsetTop, offsetHeight);
         if (offsetTop - (scrollTop + offsetHeight) < 180) {
-          console.log('Time to load more!');
           mainApi.getMoreChats(thunkDispatch).then((moreChats) => {
             setAllChatsData([...allChatsData, ...moreChats.data]);
             setLoadedAllChats(moreChats.loadedAll);
@@ -346,7 +330,6 @@ function Chats({
         const { _id, chatName, chatImage } = currentChat;
         if (!chatName) {
           mainApi.getNewChat(thunkDispatch, chatId).then((chat) => {
-            console.log(chat);
             const { messageContent: lastMessage, messageTime: lastMessageTime } = newMessage;
             const newFriendChatData = {
               ...chat,
@@ -466,7 +449,6 @@ function Chats({
         }
         /** User typing socket message */
         if (message === 'User typing') {
-          console.log(data);
           const { friendName, chatId } = data;
           const chatTypingTimer = chatTypingTimers.find((chatTimer) => chatTimer._id === chatId);
           const chatRef = refsArray.find((ref) => ref._id === chatId);
@@ -503,7 +485,6 @@ function Chats({
                   time: null,
                 },
               });
-              console.log(currentChat);
               if (!chatUserTyping) {
                 setIsUserTyping([{ _id: chatId, isTyping: true }, ...isUserTyping]);
                 setUserTypingText(`${friendName} Typing`);
@@ -548,7 +529,6 @@ function Chats({
               lastMessageTarget.textContent = `${friendName} Typing`;
               const chatInterval = setInterval(() => {
                 const currentTimerText = lastMessageTarget.textContent;
-                console.log(currentTimerText);
                 if (currentTimerText === `${friendName} Typing...`) {
                   lastMessageTarget.textContent = `${friendName} Typing`;
                 } else {
@@ -560,7 +540,6 @@ function Chats({
                   (chat) => chat._id === chatId
                 );
                 lastMessageTarget.textContent = lastMessage;
-                console.log(lastMessageByUser, lastMessageTarget);
                 if (lastMessageByUser) {
                   const newSpan = document.createElement('span');
                   newSpan.textContent = 'You:';
@@ -615,7 +594,6 @@ function Chats({
             }
             /** Set the isUserTyping state */
             const { isTyping } = isUserTyping.find((user) => user._id === chatId);
-            console.log(isTyping);
             if (!isTyping) {
               const newIsUserTyping = isUserTyping.map(({ _id, isTyping }) =>
                 _id === chatId ? { _id, isTyping: true } : { _id, isTyping }
@@ -644,7 +622,6 @@ function Chats({
           const { friends } = group;
           const listWithImages = friends.map(async (friend) => {
             const imagePromise = new Promise((resolve) => {
-              console.log(friend);
               if (friend.image !== 'Uploaded') {
                 resolve(friend);
               }
@@ -654,7 +631,6 @@ function Chats({
                   chatId: currentChat._id,
                 })
                 .then((resultFriend) => {
-                  console.log(resultFriend);
                   resolve(resultFriend);
                 });
             });
@@ -700,7 +676,6 @@ function Chats({
   ]);
   /** Making dynamic ref objects for chats array and user typing array */
   useEffect(() => {
-    console.log(allChatsData);
     if (allChatsData.length > 0) {
       setRefsArray((refsArrayState) =>
         allChatsData.map(({ _id }, i) => {
@@ -738,12 +713,10 @@ function Chats({
   useEffect(() => {
     Promise.all([
       mainApi.deleteNotificationType(thunkDispatch, 'chat').then((notifications) => {
-        console.log(notifications);
         setNotificationsQueue(notifications);
         setNotification(notifications[0] || {});
       }),
       mainApi.getChats(thunkDispatch).then((response) => {
-        console.log(response);
         const { loadedAll, data } = response;
         setLoadedAllChats(loadedAll);
         if (currentChat._id) {
@@ -767,7 +740,6 @@ function Chats({
           } = chatToOpen;
           setAllChatsData(newData);
           mainApi.getMessages(thunkDispatch, chatId).then((result) => {
-            console.log(result);
             const { loadedAll } = result;
             if (loadedAll) {
               setLoadedAllMessages(true);

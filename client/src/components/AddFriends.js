@@ -24,35 +24,37 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
   const handleAddFriend = (friendId, index, image, requestResponse) =>
     mainApi.addFriend(thunkDispatch, friendId, index, requestResponse).then((response) => {
       const newAddFriendsList = addFriendsList.filter((friend) => friend._id !== friendId);
-      if ((!image && response.image === 'Uploaded') || image === 'Uploaded') {
-        mainApi
-          .getFriendImage(
-            thunkDispatch,
-            { _id: friendId, image: 'Uploaded' },
-            {
-              listType: 'friendRequests',
-            }
-          )
-          .then((data) => {
-            setFriendRequestsList([
+      if (requestResponse) {
+        if ((!image && response.image === 'Uploaded') || image === 'Uploaded') {
+          mainApi
+            .getFriendImage(
+              thunkDispatch,
+              { _id: friendId, image: 'Uploaded' },
               {
-                ...response,
-                image: data.image,
-              },
-              ...pendingFriendRequestsList,
-            ]);
-          });
-      }
-      if (image && image !== 'Uploaded') {
-        setFriendRequestsList([
-          {
-            ...response,
-            image,
-          },
-          ...pendingFriendRequestsList,
-        ]);
-      } else {
-        setFriendRequestsList([response, ...friendRequestsList]);
+                listType: 'friendRequests',
+              }
+            )
+            .then((data) => {
+              setFriendRequestsList([
+                {
+                  ...response,
+                  image: data.image,
+                },
+                ...pendingFriendRequestsList,
+              ]);
+            });
+        }
+        if (image && image !== 'Uploaded') {
+          setFriendRequestsList([
+            {
+              ...response,
+              image,
+            },
+            ...pendingFriendRequestsList,
+          ]);
+        } else {
+          setFriendRequestsList([response, ...friendRequestsList]);
+        }
       }
       setAddFriendsList(newAddFriendsList);
     });
@@ -74,9 +76,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
         const {
           current: { offsetTop },
         } = friendsRef;
-        console.log(scrollTop, offsetTop, clientHeight);
         if (offsetTop - (scrollTop + clientHeight) < 120) {
-          console.log('Time to load more!');
           mainApi.getMoreMoreFriends(thunkDispatch, addFriendsList.length).then((moreFriends) => {
             setAddFriendsList([...addFriendsList, ...moreFriends.data]);
             setLoadedAllFriends(moreFriends.loadedAll);
@@ -94,9 +94,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
         const {
           current: { offsetTop },
         } = requestsRef;
-        console.log(offsetTop, offsetHeight);
         if (offsetTop - (scrollTop + offsetHeight) < 180) {
-          console.log('Time to load more!');
           mainApi
             .getMoreFriendsRequests(thunkDispatch, friendRequestsList.length)
             .then((moreRequests) => {
@@ -116,9 +114,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
         const {
           current: { offsetTop },
         } = pendingRef;
-        console.log(offsetTop, offsetHeight);
         if (offsetTop - (scrollTop + offsetHeight) < 180) {
-          console.log('Time to load more!');
           mainApi.getMoreChats(thunkDispatch).then((morePending) => {
             setPendingFriendRequestsList([...pendingFriendRequestsList, ...morePending.data]);
             setLoadedAllPending(morePending.loadedAll);
@@ -131,7 +127,6 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
     setUserQuery(event.target.value);
   };
   const handleUserSearch = () => {
-    console.log(userQuery);
     mainApi.findOtherUsers(thunkDispatch, userQuery).then(({ loadedAll, moreFriendsList }) => {
       setAddFriendsList(moreFriendsList);
       setLoadedAllFriends(loadedAll);
@@ -143,7 +138,6 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
       setNotification(notifications[0] || {});
     });
     mainApi.getAddFriends(thunkDispatch).then((response) => {
-      console.log(response);
       const { moreFriends, friendRequests, pendingFriendRequests } = response;
       setAddFriendsList(moreFriends.data);
       setLoadedAllFriends(moreFriends.loadedAll);
@@ -209,21 +203,22 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
             </button>
             {addFriendsList &&
               addFriendsList.length > 0 &&
-              addFriendsList.map(({ _id, firstName, lastName, image }, index) => (
+              addFriendsList.map(({ _id, firstName, lastName, image, isBlocked }, index) => (
                 <FriendCard
                   key={_id}
                   _id={_id}
                   image={image}
                   firstName={firstName}
                   lastName={lastName}
+                  isBlocked={isBlocked}
                   index={index}
                   friendAction={handleAddFriend}
                   buttonIcon={addButton}
                   buttonAlt="Add button"
                   buttonReadyText="Add"
                   buttonActiveText="Sent"
-                  buttonAltReadyText="Block"
-                  buttonAltActiveText="Blocked"
+                  buttonAltReadyText={isBlocked ? 'Unblock' : 'Block'}
+                  buttonAltActiveText={isBlocked ? 'Unblocked' : 'Blocked'}
                   classType="more"
                 />
               ))}
@@ -248,7 +243,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
           >
             {friendRequestsList &&
               friendRequestsList.length > 0 &&
-              friendRequestsList.map(({ _id, firstName, lastName, image }, index) => (
+              friendRequestsList.map(({ _id, firstName, lastName, image, isBlocked }, index) => (
                 <FriendCard
                   key={_id}
                   _id={_id}
@@ -261,8 +256,8 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
                   buttonAlt="Add button"
                   buttonReadyText="Remove"
                   buttonActiveText="Removed"
-                  buttonAltReadyText="Block"
-                  buttonAltActiveText="Blocked"
+                  buttonAltReadyText={isBlocked ? 'Unblock' : 'Block'}
+                  buttonAltActiveText={isBlocked ? 'Unblocked' : 'Blocked'}
                   classType="request"
                 />
               ))}

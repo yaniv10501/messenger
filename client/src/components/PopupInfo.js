@@ -13,7 +13,6 @@ function PopupInfo({ name, popupTitle, isNotifPopupOpen, handleClose, setCurrent
     const image = event.target.files[0];
     formData.append('profilePic', image, image.name);
     mainApi.setUserImage(thunkDispatch, formData).then((response) => {
-      console.log(response);
       setCurrentUser(response);
       handleClose();
     });
@@ -26,7 +25,6 @@ function PopupInfo({ name, popupTitle, isNotifPopupOpen, handleClose, setCurrent
       handleClose();
     } else {
       mainApi.setDontDisturbProfile(thunkDispatch).then((response) => {
-        console.log(response);
         handleClose();
       })
     }

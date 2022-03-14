@@ -34,7 +34,6 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
     const image = event.target.files[0];
     tempData.append('groupPic', image, image.name);
     mainApi.setGroupImage(thunkDispatch, currentChat._id, tempData).then((response) => {
-      console.log(response);
     });
   };
   const addFriendToGroup = (event, _id, friendName) => {
@@ -52,11 +51,9 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
       target.textContent = 'Added';
       setSelectedFriends([{ _id, friendName }, ...selectedFriends]);
     }
-    console.log(_id, friendName);
   };
   const removeSelectedFriend = (_id) => {
     setSelectedFriends(selectedFriends.filter(({ _id: friendId }) => friendId !== _id));
-    console.log(refsArray);
     const {
       ref: { current: friendButton },
     } = refsArray.find(({ _id: friendId }) => friendId === _id);
@@ -64,7 +61,6 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
   };
   useEffect(() => {
     if (currentChat.friends) {
-      console.log(currentChat);
       const { friends } = currentChat;
       const listWithImages = friends.map(async (friend) => {
         const imagePromise = new Promise(async (resolve) => {
@@ -77,14 +73,12 @@ function GroupSettingsPopup({ currentChat, isPopupOpen, handleClose }) {
               chatId: currentChat._id,
             })
             .then((resultFriend) => {
-              console.log(resultFriend);
               resolve(resultFriend);
             });
         });
         return imagePromise.then((result) => result);
       });
       Promise.all(listWithImages).then((resultList) => {
-        console.log(resultList);
         setGroupFriends(resultList);
         if (friends) {
           setRefsArray((refsArray) =>

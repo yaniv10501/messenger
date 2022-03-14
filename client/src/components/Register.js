@@ -44,7 +44,6 @@ function Register() {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (isValid) {
-      console.log(values);
       mainApi
         .signUp(
           thunkDispatch,
@@ -60,7 +59,6 @@ function Register() {
         )
         .then((response) => {
           if (response instanceof Error) {
-            console.log(response);
             return;
           }
           navigate('/login');
@@ -76,9 +74,7 @@ function Register() {
     else passwordShowButton.type = 'password';
   };
   const checkUserTaken = (userNameValue) => {
-    console.log(userNameValue);
     mainApi.checkUserTaken(thunkDispatch, userNameValue).then((response) => {
-      console.log(response);
       const { isTaken } = response;
       setIsUserTakenLoading(false);
       if (isTaken) {
