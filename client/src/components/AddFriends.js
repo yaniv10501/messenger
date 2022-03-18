@@ -21,7 +21,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
   const [pendingFriendRequestsList, setPendingFriendRequestsList] = useState([]);
   const [userQuery, setUserQuery] = useState('');
   const handleBack = () => navigate('/');
-  const handleAddFriend = (friendId, index, image, requestResponse) =>
+  const handleAddFriend = (friendId, index, requestResponse, image) =>
     mainApi.addFriend(thunkDispatch, friendId, index, requestResponse).then((response) => {
       const newAddFriendsList = addFriendsList.filter((friend) => friend._id !== friendId);
       if (requestResponse) {
@@ -58,7 +58,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
       }
       setAddFriendsList(newAddFriendsList);
     });
-  const handleAcceptRequest = (requestId, index, image, requestResponse) =>
+  const handleAcceptRequest = (requestId, index, requestResponse) =>
     mainApi
       .responseFriendRequest(thunkDispatch, requestId, index, requestResponse)
       .then((response) => {
@@ -131,6 +131,9 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
       setAddFriendsList(moreFriendsList);
       setLoadedAllFriends(loadedAll);
     });
+  };
+  const handleAlterRequest = (requestId, index, requestResponse) => {
+    mainApi.alterFriendRequest(thunkDispatch, requestId, index, requestResponse);
   };
   useEffect(() => {
     mainApi.deleteNotificationType(thunkDispatch, 'friend').then((notifications) => {
@@ -251,7 +254,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
                   firstName={firstName}
                   lastName={lastName}
                   index={index}
-                  friendAction={handleAddFriend}
+                  friendAction={handleAlterRequest}
                   buttonIcon={addButton}
                   buttonAlt="Add button"
                   buttonReadyText="Remove"

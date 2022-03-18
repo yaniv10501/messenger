@@ -822,6 +822,19 @@ class MainApi {
         silent: true,
       }
     ).then((response) => response);
+
+  alterFriendRequest = (dispatch, requestId, index, requestResponse) =>
+    useFetch(
+      dispatch,
+      `${this.baseUrl}/friends/alter/${requestId}?index=${index}&response=${requestResponse}`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+      {
+        silent: true,
+      }
+    ).then((response) => response);
 }
 
 const mainApi = new MainApi(backEndApi);

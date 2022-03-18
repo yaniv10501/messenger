@@ -24,7 +24,7 @@ function FriendCard({
     } else {
       setButtonAltText(buttonAltActiveText);
     }
-    friendAction(_id, index, image, response);
+    friendAction(_id, index, response, image);
   };
   return (
     <div className={`add-friends__${classType}-friend-container`} key={_id}>
