@@ -59,9 +59,12 @@ class MainApi {
         resovle(friend);
       } else {
         const { _id } = friend;
+        console.log(friend);
         useFetch(
           dispatch,
-          `${this.baseUrl}/image/${_id}?listType=${listType}&index=${index}&chatId=${chatId}`,
+          `${this.baseUrl}/image/${_id}?listType=${listType}&index=${index}&chatId=${
+            chatId || friend._id
+          }`,
           {
             credentials: 'include',
           },
@@ -821,7 +824,20 @@ class MainApi {
       {
         silent: true,
       }
-    ).then((response) => response);
+    ).then(async ({ loadedAll = false, moreFriendsList = [] }) => {
+      const otherUsersList = await Promise.all(
+        moreFriendsList.map((friendItem, index) =>
+          this.getFriendImage(dispatch, friendItem, {
+            listType: 'friends',
+            index,
+          })
+        )
+      );
+      return {
+        loadedAll,
+        moreFriendsList: otherUsersList,
+      };
+    });
 
   alterFriendRequest = (dispatch, requestId, index, requestResponse) =>
     useFetch(

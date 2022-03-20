@@ -21,7 +21,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
   const [pendingFriendRequestsList, setPendingFriendRequestsList] = useState([]);
   const [userQuery, setUserQuery] = useState('');
   const handleBack = () => navigate('/');
-  const handleAddFriend = (friendId, index, requestResponse, image) =>
+  const handleAddFriend = (friendId, index, requestResponse, isBlocked, image) =>
     mainApi.addFriend(thunkDispatch, friendId, index, requestResponse).then((response) => {
       const newAddFriendsList = addFriendsList.filter((friend) => friend._id !== friendId);
       if (requestResponse) {
@@ -56,7 +56,9 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
           setFriendRequestsList([response, ...friendRequestsList]);
         }
       }
-      setAddFriendsList(newAddFriendsList);
+      if (!isBlocked) {
+        setAddFriendsList(newAddFriendsList);
+      }
     });
   const handleAcceptRequest = (requestId, index, requestResponse) =>
     mainApi
@@ -253,6 +255,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
                   image={image}
                   firstName={firstName}
                   lastName={lastName}
+                  isBlocked={isBlocked}
                   index={index}
                   friendAction={handleAlterRequest}
                   buttonIcon={addButton}

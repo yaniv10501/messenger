@@ -6,6 +6,7 @@ function FriendCard({
   image,
   firstName,
   lastName,
+  isBlocked,
   index,
   friendAction,
   buttonIcon,
@@ -24,7 +25,7 @@ function FriendCard({
     } else {
       setButtonAltText(buttonAltActiveText);
     }
-    friendAction(_id, index, response, image);
+    friendAction(_id, index, response, isBlocked, image);
   };
   return (
     <div className={`add-friends__${classType}-friend-container`} key={_id}>
