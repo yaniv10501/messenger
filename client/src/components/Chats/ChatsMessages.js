@@ -122,6 +122,7 @@ function ChatsMessages({
     handleMessagesScroll(event);
   };
   useEffect(() => {
+    console.log(currentChat);
     const { messages } = currentChat || {};
     if (messages && messages.length > 0) {
       setChatTimeRefs((chatTimeRefsState) => {
@@ -145,7 +146,6 @@ function ChatsMessages({
             }
           }
         });
-        console.log(updateToday);
         if (updateToday) {
           return [createRef(), ...chatTimeRefsState, ...newRefs];
         }
@@ -211,9 +211,11 @@ function ChatsMessages({
                   </p>
                 ) : (
                   <p className="chats__friend-header-bottom-title">
-                    {currentChat.isOnline.online ? 'Online' : ''}
+                    {currentChat.isOnline?.online ? 'Online' : ''}
                     <span className="chats__friend-header-bottom-text">
-                      {currentChat.isOnline.online ? '' : `Was online ${currentChat.isOnline.time}`}
+                      {currentChat.isOnline?.online
+                        ? ''
+                        : `Was online ${currentChat.isOnline?.time || ''}`}
                     </span>
                   </p>
                 )}
@@ -351,9 +353,11 @@ function ChatsMessages({
                 </p>
               ) : (
                 <p className="chats__friend-header-bottom-title">
-                  {currentChat.isOnline.online ? 'Online' : ''}
+                  {currentChat.isOnline?.online ? 'Online' : ''}
                   <span className="chats__friend-header-bottom-text">
-                    {currentChat.isOnline.online ? '' : `Was online ${currentChat.isOnline.time}`}
+                    {currentChat.isOnline?.online
+                      ? ''
+                      : `Was online ${currentChat.isOnline?.time || ''}`}
                   </span>
                 </p>
               )}
