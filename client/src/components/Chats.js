@@ -162,13 +162,15 @@ function Chats({
     const { _id } = currentChat;
     if (_id) {
       const { current: messagesContainer } = messagesContainerRef;
-      messagesContainer.scrollTo({
-        top: 0,
-        left: 0,
-      });
-      mainApi.leaveChat(thunkDispatch, _id).then((response) => {
-        console.log(response);
-      });
+      if (messagesContainer) {
+        messagesContainer.scrollTo({
+          top: 0,
+          left: 0,
+        });
+        mainApi.leaveChat(thunkDispatch, _id).then((response) => {
+          console.log(response);
+        });
+      }
     }
     const resetUnreadPromise =
       unreadCount > 0
@@ -715,6 +717,7 @@ function Chats({
         setNotification(notifications[0] || {});
       }),
       mainApi.getChats(thunkDispatch).then((response) => {
+        console.log(response);
         const { loadedAll, data } = response;
         setLoadedAllChats(loadedAll);
         if (currentChat._id) {
