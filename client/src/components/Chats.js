@@ -55,10 +55,7 @@ function Chats({
   };
 
   const createNewGroup = (newGroup) => {
-    setAllChatsData([
-      newGroup,
-      ...allChatsData,
-    ]);
+    setAllChatsData([newGroup, ...allChatsData]);
   };
 
   const handleChange = (event) => {
@@ -180,6 +177,7 @@ function Chats({
           })
         : null;
     const messagesPromise = mainApi.getMessages(thunkDispatch, chatId).then((result) => {
+      console.log(result);
       const { loadedAll } = result;
       if (loadedAll) {
         setLoadedAllMessages(true);

@@ -159,7 +159,7 @@ function AddFriends({ chatWebSocket, setNotification, setNotificationsQueue }) {
         if (message === 'Friend request') {
           const otherUser = addFriendsList.find((friend) => friend._id === data._id);
           const newAddFriendsList = addFriendsList.filter((friend) => friend._id !== data._id);
-          if ((!otherUser.image && data.image === 'Uploaded') || otherUser.image === 'Uploaded') {
+          if (!otherUser || (!otherUser.image && data.image === 'Uploaded') || otherUser.image === 'Uploaded') {
             mainApi
               .getFriendImage(thunkDispatch, data, {
                 listType: 'pendingRequests',
